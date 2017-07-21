@@ -1,0 +1,8 @@
+name: MiniGameCore
+main: network.marble.minigamecore.MiniGameCore
+version: 0.0.1-SNAPSHOT
+author: Marble Network
+depend: [DataAccessLayer, ProtocolLib]
+prefix: MGC
+commands:
+  debug:

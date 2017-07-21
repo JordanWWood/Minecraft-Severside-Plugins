@@ -1,0 +1,11 @@
+name: Vanity
+version: 1.0
+authors: [MarbleNetwork]
+load: postworld
+prefix: VAN
+main: network.marble.vanity.Vanity
+
+depend: [InventoryAPI]
+
+commands:
+permissions:

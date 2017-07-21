@@ -1,0 +1,8 @@
+name: InventoryAPI
+version: ${project.version}
+authors: [PixelPerfect]
+load: STARTUP
+prefix: IAPI
+main: network.marble.inventoryapi.InventoryAPIPlugin
+
+#depend: []

@@ -1,0 +1,5 @@
+name: Moderation
+main: network.marble.moderation.Moderation
+version: 1.0
+author: Wolfii
+depends: [DataAccessLayer]

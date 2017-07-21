@@ -1,0 +1,32 @@
+name: ModerationSlave
+version: 1.0
+authors: [Wolfii, MarbleNetwork]
+main: network.marble.moderationslave.ModerationSlave
+prefix: MOD
+depend: [DataAccessLayer]
+website: http://marble.network
+
+commands:
+  punishment:
+    aliases: [p, punish]
+  kick:
+
+permissions:
+  moderation.commands.punishment:
+    default: false
+  moderation.commands.kick:
+    default: false
+  moderation.commands.*:
+    children:
+      moderation.commands.punishment: true
+      moderation.commands.kick: true
+    default: false
+  moderation.chat.color:
+    default: false
+  moderation.chat.staff:
+    default: false
+  moderation.chat.*:
+    children:
+      moderation.chat.color: true
+      moderation.chat.staff: true
+    default: false

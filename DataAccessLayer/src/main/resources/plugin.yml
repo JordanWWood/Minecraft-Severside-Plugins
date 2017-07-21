@@ -1,0 +1,6 @@
+name: DataAccessLayer
+version: ${project.version}
+authors: [Marble Network]
+load: STARTUP
+prefix: DAL
+main: network.marble.dataaccesslayer.bukkit.DataAccessLayer
