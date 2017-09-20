@@ -18,9 +18,9 @@ public class cmdMute extends Command {
     }
 
     @Override
-    public void execute(CommandSender commandSender, String[] strings) {
-        if (commandSender instanceof ProxiedPlayer){
-            if (commandSender.hasPermission("moderation.commands.mute")){
+    public void execute(CommandSender sender, String[] strings) {
+        if (sender instanceof ProxiedPlayer){
+            if (sender.hasPermission("moderation.commands.mute")){
                 if (strings.length > 2){
                     Long totalMillis = 0L;
                     int length = 0;
@@ -34,13 +34,13 @@ public class cmdMute extends Command {
                         e.printStackTrace();
                     }
 
-                    if (u == null){
-                        commandSender.sendMessage(FontFormat.translateString("&cUser " + strings[0] + "could not be found"));
+                    if (u == null) {
+                        sender.sendMessage(FontFormat.translateString("&cUser " + strings[0] + "could not be found"));
                         return;
                     }
 
                     for (int i = 1; i < strings.length; i++){
-                        if (strings[1].equalsIgnoreCase("permanant")){
+                        if (strings[1].equalsIgnoreCase("permanent")){
                             totalMillis = 157784630000L;
                             break;
                         }
@@ -68,15 +68,15 @@ public class cmdMute extends Command {
 
                     u.getModeration().mute_end_time = totalMillis + System.currentTimeMillis();
 
-                    commandSender.sendMessage(FontFormat.translateString("&aUser " + strings[0] + " has been muted"));
+                    sender.sendMessage(FontFormat.translateString("&aUser " + strings[0] + " has been muted"));
                 } else {
-                    commandSender.sendMessage(FontFormat.translateString("Incorrect perameters! /mute (user) (amount of time) (reason...)"));
+                    sender.sendMessage(FontFormat.translateString("Incorrect perameters! /mute (user) (amount of time) (reason...)"));
                 }
             } else {
-                commandSender.sendMessage(FontFormat.translateString("TODO"));
+                sender.sendMessage(FontFormat.translateString("TODO"));
             }
         } else {
-            commandSender.sendMessage(FontFormat.translateString("TODO"));
+            sender.sendMessage(FontFormat.translateString("TODO"));
         }
     }
 

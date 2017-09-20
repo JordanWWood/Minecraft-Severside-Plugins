@@ -3,8 +3,6 @@ package network.marble.moderation.punishment.communication;
 
 import com.rabbitmq.client.*;
 
-import com.sun.org.apache.xpath.internal.operations.Mod;
-
 import network.marble.dataaccesslayer.bungee.DataAccessLayer;
 import network.marble.moderation.Moderation;
 
@@ -14,12 +12,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public class RabbitListener {
-    Connection connection = DataAccessLayer.getInstance().getRabbitMQConnection();
-    Channel channel;
+    private Connection connection = DataAccessLayer.getInstance().getRabbitMQConnection();
+    private Channel channel;
 
-    final String EXCHANGE = "Moderation_Punishment";
+    private final String EXCHANGE = "Moderation_Punishment";
 
-    Map<UUID, String> playerQueue = new HashMap<>();
+    private Map<UUID, String> playerQueue = new HashMap<>();
 
     public RabbitListener() {
         try {
@@ -34,7 +32,7 @@ public class RabbitListener {
         final String QueueName = channel.queueDeclare("Mod." + player.toString(), false, false, true, null).getQueue();
 
         playerQueue.put(player, QueueName);
-        channel.queueBind(QueueName, EXCHANGE, "inbound" + player.toString());
+        channel.queueBind(QueueName, EXCHANGE, "inbound." + player.toString());
 
         Consumer consumer = new DefaultConsumer(channel) {
             @Override

@@ -15,6 +15,7 @@ import net.md_5.bungee.protocol.packet.Kick;
 import network.marble.moderation.Moderation;
 
 import java.util.Random;
+import java.util.UUID;
 
 /**
  * Our own implementation of the BungeeCord DownstreamBridge.<br>
@@ -46,8 +47,6 @@ public class PunishmentBridge extends DownstreamBridge {
         }
         // setObsolete so that DownstreamBridge.disconnected(ChannelWrapper) won't be called.
         server.setObsolete(true);
-
-        Moderation.getPunishmentManager().limboIfOnline(user, server);
     }
 
     @Override
@@ -58,13 +57,14 @@ public class PunishmentBridge extends DownstreamBridge {
         }
         ServerKickEvent event = bungee.getPluginManager().callEvent(new ServerKickEvent(user, server.getInfo(), ComponentSerializer.parse(kick.getMessage()), def, ServerKickEvent.State.CONNECTED));
         if (event.isCancelled() && event.getCancelServer() != null) {
+            Moderation.getInstance().getLogger().info("Cancelled");
             user.connectNow(event.getCancelServer());
         } else {
             String kickMessage = ChatColor.stripColor(BaseComponent.toLegacyText(ComponentSerializer.parse(kick.getMessage()))); // cancer
             Moderation.getInstance().getLogger().info(kickMessage);
 
             boolean doKeepalive = false;
-            if (kickMessage.equals("KickedForPunishment")) {
+            if (kickMessage.startsWith("KickedForPunishment")) {
                 doKeepalive = true;
             }
 
@@ -72,13 +72,18 @@ public class PunishmentBridge extends DownstreamBridge {
             if (!doKeepalive) {
                 user.disconnect0(event.getKickReasonComponent());
             } else {
-                Moderation.getPunishmentManager().limboIfOnline(user, server);
+                String regex = "KickedForPunishment-";
+                String id = kickMessage.replaceAll(regex, "");
+                UUID caseID = UUID.fromString(id);
+
+                Moderation.getInstance().getLogger().info(caseID.toString());
+
+                Moderation.getPunishmentManager().limboIfOnline(user, server, caseID);
             }
-
-            server.setObsolete(true);
-
-            // Throw Exception so that the Packet won't be send to the Minecraft Client.
-            throw CancelSendSignal.INSTANCE;
         }
+
+        server.setObsolete(true);
+
+        throw CancelSendSignal.INSTANCE;
     }
 }

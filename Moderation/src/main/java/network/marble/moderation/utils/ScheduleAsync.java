@@ -5,10 +5,7 @@ import network.marble.moderation.Moderation;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by jorda_000 on 15/05/2017.
- */
-public class SheduleAsync {
+public class ScheduleAsync {
 
     /**
      * Schedules a task and executes it asynchronously.
@@ -17,7 +14,7 @@ public class SheduleAsync {
      * @param time     The amount of time the task should be scheduled.
      * @param timeUnit The {@link TimeUnit} of the time parameter.
      */
-    public SheduleAsync(final Runnable runnable, long time, TimeUnit timeUnit) {
+    public ScheduleAsync(final Runnable runnable, long time, TimeUnit timeUnit) {
         ProxyServer.getInstance().getScheduler().schedule(Moderation.getInstance(), new Runnable() {
             @Override
             public void run() {

@@ -1,18 +1,25 @@
 package network.marble.moderation.punishment;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.md_5.bungee.ServerConnection;
 import net.md_5.bungee.UserConnection;
+import network.marble.dataaccesslayer.exceptions.APIException;
+import network.marble.dataaccesslayer.models.plugins.moderation.Case;
+import network.marble.dataaccesslayer.models.plugins.moderation.JudgementSession;
+import network.marble.dataaccesslayer.models.user.User;
 import network.marble.moderation.Moderation;
 import network.marble.moderation.punishment.communication.RabbitListener;
+import network.marble.moderation.utils.FontFormat;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
 public class PunishmentManager {
-    private HashMap<UUID, PunishmentTask> punishmentTasks = new HashMap<>();
+    @Getter private HashMap<UUID, PunishmentTask> punishmentTasks = new HashMap<>();
     private RabbitListener rabbitListener = new RabbitListener();
 
     /**
@@ -32,10 +39,10 @@ public class PunishmentManager {
      * @param user   The User that should be reconnected.
      * @param server The Server the User should be connected to.
      */
-    public void limboIfOnline(UserConnection user, ServerConnection server) {
+    public void limboIfOnline(UserConnection user, ServerConnection server, UUID c) {
         if (isUserOnline(user)) {
             if (!isUnderPunishment(user.getUniqueId())) {
-                limbo(user, server);
+                limbo(user, server, c);
             }
         } else {
             cancelPunishmentTask(user.getUniqueId());
@@ -48,14 +55,61 @@ public class PunishmentManager {
      * @param user   The User that should be reconnected.
      * @param server The Server the User should be connected to.
      */
-    private void limbo(UserConnection user, ServerConnection server) {
+    private void limbo(UserConnection user, ServerConnection server, UUID caseID) {
+//        try {
+//            rabbitListener.DeclareQueueForPlayer(user.getUniqueId());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        User u = null;
+        Case c = null;
         try {
-            rabbitListener.DeclareQueueForPlayer(user.getUniqueId());
-        } catch (IOException e) {
+            u = new User().getByUUID(user.getUniqueId());
+            c = new Case().get(caseID);
+        } catch (APIException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        u.setInJudgement(true);
+
+        try {
+            u.save();
+        } catch (APIException e) {
             e.printStackTrace();
         }
 
-        PunishmentTask punishmentTask = punishmentTasks.computeIfAbsent(user.getUniqueId(), k -> new PunishmentTask(Moderation.getInstance().getProxy(), user, server));
+        JudgementSession js = null;
+        if (c.getJudgement_session_id() == null) {
+            js = new JudgementSession();
+            js.setCreated_at(System.currentTimeMillis());
+            js.setJudgementee(u.getId());
+            try {
+                js = js.saveAndReturn();
+            } catch (APIException e) {
+                e.printStackTrace();
+                return;
+            }
+        } else {
+            try {
+                js = new JudgementSession().get(c.getJudgement_session_id());
+            } catch (APIException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+        c.setJudgement_session_id(js.getId());
+
+        try {
+            c = c.saveAndReturn();
+        } catch (APIException e) {
+            e.printStackTrace();
+        }
+
+        Case finalC = c;
+        PunishmentTask punishmentTask = punishmentTasks.computeIfAbsent(user.getUniqueId(), k -> new PunishmentTask(Moderation.getInstance().getProxy(), user, server, finalC));
+        user.sendMessage(FontFormat.translateString("&cYou have been moved to Limbo whilst you await a final decision on your punishment by a moderator."));
         punishmentTask.tick();
     }
 
@@ -67,7 +121,6 @@ public class PunishmentManager {
     void cancelPunishmentTask(UUID uuid) {
         PunishmentTask task = punishmentTasks.remove(uuid);
     }
-
 
 
     /**
