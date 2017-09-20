@@ -1,12 +1,18 @@
 package network.marble.dataaccesslayer.models.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import network.marble.dataaccesslayer.common.Context;
 import network.marble.dataaccesslayer.common.ModelUtils;
+import network.marble.dataaccesslayer.entities.Result;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.managers.CacheManager;
 import okhttp3.Request;
@@ -19,12 +25,20 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("rawtypes")
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class BaseModel<T extends BaseModel> {
+    @JsonIgnore
     protected final String urlEndPoint;
+    @JsonIgnore
     private final String multiName;
+    @JsonIgnore
     private final String singleName;
+    @JsonIgnore
     protected final Context context;
-    private final ModelUtils<T> utils;
+    @JsonIgnore
+    protected final ModelUtils<T> utils;
 
     public BaseModel(String urlEndPoint, String multiName, String singleName) {
         this.urlEndPoint = urlEndPoint;
@@ -104,8 +118,16 @@ public abstract class BaseModel<T extends BaseModel> {
         return this.exists() ? update() : insert();
     }
 
+    public Result saveWithResult() throws APIException {
+        return this.exists() ? updateWithResult() : insertWithResult();
+    }
+
     public boolean update() throws APIException {
         return update(urlEndPoint + "/" + this.id.toString());
+    }
+
+    public Result updateWithResult() throws APIException {
+        return updateWithResult(urlEndPoint + "/" + this.id.toString());
     }
 
     @SuppressWarnings("unchecked")
@@ -116,12 +138,28 @@ public abstract class BaseModel<T extends BaseModel> {
         utils.errorCheck(returned);
         returned = utils.getJsonAtRoot(returned, "replaced");
         boolean result = returned != null && Integer.parseInt(returned) > 0;
-        if (result && CacheManager.getInstance().getCache().containsKey(this.id) && CacheManager.enabled) CacheManager.getInstance().getCache().remove(this.id);
+        if (result && CacheManager.getInstance().getCache().containsKey(this.id) && CacheManager.enabled) CacheManager.getInstance().getCache().replace(this.id, this);
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Result updateWithResult(String url) throws APIException {
+        String json = serializeModel((T)this);
+        Request r = context.putRequest(url, json);
+        String returned = context.executeRequest(r);
+        utils.errorCheck(returned);
+        Result resultModel = deserializeModel(returned, Result.class);
+        boolean result = resultModel != null && resultModel.getReplaced() > 0;
+        if (result && CacheManager.getInstance().getCache().containsKey(this.id) && CacheManager.enabled) CacheManager.getInstance().getCache().replace(this.id, this);
+        return resultModel;
     }
 
     public boolean insert() throws APIException {
         return insert(urlEndPoint);
+    }
+
+    public Result insertWithResult() throws APIException {
+        return insertWithResult(urlEndPoint);
     }
 
     @SuppressWarnings("unchecked")
@@ -134,8 +172,26 @@ public abstract class BaseModel<T extends BaseModel> {
         return returned != null && Integer.parseInt(returned) > 0;
     }
 
+    @SuppressWarnings("unchecked")
+    protected Result insertWithResult(String url) throws APIException {
+        String json = serializeModel((T)this);
+        Request r = context.postRequest(url, json);
+        String returned = context.executeRequest(r);
+        utils.errorCheck(returned);
+        Result result = deserializeModel(returned, Result.class);
+        if (result != null && result.getInserted() > 0 && result.getGeneratedKeys().size() > 0) {
+            this.id = result.getGeneratedKeys().get(0);
+            if (CacheManager.enabled) CacheManager.getInstance().getCache().put(this.id, this);
+        }
+        return result;
+    }
+
     public boolean delete() throws APIException {
-        return insert(urlEndPoint + "/" + this.id.toString());
+        return delete(urlEndPoint + "/" + this.id.toString());
+    }
+
+    public Result deleteWithResult() throws APIException {
+        return deleteWithResult(urlEndPoint + "/" + this.id.toString());
     }
 
     protected boolean delete(String url) throws APIException {
@@ -148,12 +204,25 @@ public abstract class BaseModel<T extends BaseModel> {
         return result;
     }
 
+    protected Result deleteWithResult(String url) throws APIException {
+        Request r = context.deleteRequest(url);
+        String returned = context.executeRequest(r);
+        utils.errorCheck(returned);
+        Result result = deserializeModel(returned, Result.class);
+        if (result.getDeleted() > 0 && CacheManager.getInstance().getCache().containsKey(this.id) && CacheManager.enabled) CacheManager.getInstance().getCache().remove(this.id);
+        return result;
+    }
+
     public abstract Class<?> getTypeClass();
 
     protected T deserializeModel(String data) {
+        return deserializeModel(data, getTypeClass());
+    }
+
+    protected <E> E deserializeModel(String data, Class<?> clazz) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            JavaType type = mapper.getTypeFactory().constructType(getTypeClass());
+            JavaType type = mapper.getTypeFactory().constructType(clazz);
             return mapper.readValue(data, type);
         } catch (IOException e) {
             e.printStackTrace();
@@ -190,12 +259,5 @@ public abstract class BaseModel<T extends BaseModel> {
             e.printStackTrace();
             return null;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "BaseModel{" +
-                "id=" + id +
-                '}';
     }
 }

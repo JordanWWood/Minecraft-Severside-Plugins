@@ -1,8 +1,11 @@
 package network.marble.dataaccesslayer.models.plugins.friends;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 import okhttp3.Request;
@@ -11,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Friend extends BaseModel<Friend> {
     public Friend(){
         super("plugins/friends", "friends", "friend");
@@ -48,15 +54,5 @@ public class Friend extends BaseModel<Friend> {
     @Override
     public Class<?> getTypeClass() {
         return Friend.class;
-    }
-
-    @Override
-    public String toString() {
-        return "Friend{" +
-                "sender=" + sender +
-                ", receiver=" + receiver +
-                ", accepted=" + accepted +
-                ", accepted_at=" + accepted_at +
-                "} " + super.toString();
     }
 }

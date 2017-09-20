@@ -1,23 +1,30 @@
 package network.marble.dataaccesslayer.models.plugins.badge;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 import okhttp3.Request;
 
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Badge extends BaseModel<Badge> {
     public Badge(){
         super("plugins/badges", "badges", "badge");
     }
     
     public String name;
-    public int progressLimit;
+    public int maxProgress;
     public String description;
-    public boolean givesBackgroundArt;
-    public String parentPlugin;
     public boolean isLimited;
+    public HashMap<String, String> awards;
+    public List<String> progressFlags;
 
     @Override
     public Class<?> getTypeClass() {
@@ -30,17 +37,5 @@ public class Badge extends BaseModel<Badge> {
     
     public List<Badge> getByPlugin(String plugin) throws APIException {
         return getMultiple(String.format("%s/plugin/%s", urlEndPoint, plugin));
-    }
-
-    @Override
-    public String toString() {
-        return "Badge{" +
-                "name='" + name + '\'' +
-                ", progressLimit=" + progressLimit +
-                ", description='" + description + '\'' +
-                ", givesBackgroundArt=" + givesBackgroundArt +
-                ", parentPlugin='" + parentPlugin + '\'' +
-                ", isLimited=" + isLimited +
-                "} " + super.toString();
     }
 }

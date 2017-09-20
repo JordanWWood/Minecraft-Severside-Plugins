@@ -1,8 +1,14 @@
 package network.marble.dataaccesslayer.models.plugins.hubby;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import lombok.ToString;
 import network.marble.dataaccesslayer.entities.Vector;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HubConfig extends BaseModel<HubConfig> {
     public HubConfig() {
         super("plugins/hubby/configs", "configs", "config");
@@ -25,18 +31,5 @@ public class HubConfig extends BaseModel<HubConfig> {
     @Override
     public Class<?> getTypeClass() {
         return HubConfig.class;
-    }
-
-    @Override
-    public String toString() {
-        return "HubConfig{" +
-                "configName='" + configName + '\'' +
-                ", rainByDefault=" + rainByDefault +
-                ", defaultTime=" + defaultTime +
-                ", spawn=" + spawn +
-                ", spawnWorld='" + spawnWorld + '\'' +
-                ", spawnDirection=" + spawnDirection +
-                ", mapFile='" + mapFile + '\'' +
-                "} " + super.toString();
     }
 }

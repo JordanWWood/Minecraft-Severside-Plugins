@@ -1,17 +1,22 @@
 package network.marble.dataaccesslayer.models.user;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import network.marble.dataaccesslayer.bukkit.DataAccessLayer;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 import network.marble.dataaccesslayer.models.plugins.friends.Friend;
 import network.marble.dataaccesslayer.models.plugins.moderation.Rank;
-import okhttp3.Request;
 
 import java.util.*;
 
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User extends BaseModel<User> {
     public User() {
         super("users", "users", "user");
@@ -39,7 +44,10 @@ public class User extends BaseModel<User> {
     public List<BlockedUser> blockedUsers = new ArrayList<>();
 
     @Getter @Setter
-    public List<UserBadge> badges = new ArrayList<>();
+    public List<BadgesInProgress> badgesInProgress = new ArrayList<>();
+
+    @Getter @Setter
+    public HashMap<UUID, Long> earnedBadges = new HashMap<>();
 
     @Getter @Setter
     public UUID uuid;
@@ -115,7 +123,7 @@ public class User extends BaseModel<User> {
             return false;
         }
 
-        for (String permission : rank.getPermissions()) {
+        if (rank.getPermissions() != null) for (String permission : rank.getPermissions()) {
             if (permission.equals("*")) return true;
             if (permission.contains("*")) {
                 String[] checks = permission.split("/\\*/");
@@ -130,26 +138,5 @@ public class User extends BaseModel<User> {
     @Override
     public Class<?> getTypeClass() {
         return User.class;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "name='" + name + '\'' +
-                ", displayName='" + displayName + '\'' +
-                ", rank_id=" + rank_id +
-                ", moderation=" + moderation +
-                ", ip='" + ip + '\'' +
-                ", preferences=" + preferences +
-                ", blockedUsers=" + blockedUsers +
-                ", badges=" + badges +
-                ", uuid=" + uuid +
-                ", forumdata=" + forumdata +
-                ", balances=" + balances +
-                ", inJudgement=" + inJudgement +
-                ", vanityitems=" + vanityitems +
-                ", equippedVanityItems=" + equippedVanityItems +
-                ", language='" + language + '\'' +
-                "} " + super.toString();
     }
 }

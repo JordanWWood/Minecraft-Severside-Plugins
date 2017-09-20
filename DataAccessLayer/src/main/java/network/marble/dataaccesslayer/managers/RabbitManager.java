@@ -2,7 +2,7 @@ package network.marble.dataaccesslayer.managers;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Consumer;
-import network.marble.dataaccesslayer.bukkit.DataAccessLayer;
+import network.marble.dataaccesslayer.base.DataAccessLayer;
 import network.marble.dataaccesslayer.consumers.RabbitConsumer;
 
 import java.io.IOException;
@@ -37,10 +37,10 @@ public class RabbitManager {
 
     public Channel getChannel() {
         if (globalChannel == null || !globalChannel.isOpen()) try {
-            Channel channel = DataAccessLayer.getInstance().getRabbitMQConnection().createChannel();
-            channel.exchangeDeclare(EXCHANGENAME, "direct");
+            Channel channel = DataAccessLayer.instance.getRabbitMQConnection().createChannel();
+            channel.exchangeDeclare(EXCHANGENAME, "topic");
             queueName = channel.queueDeclare().getQueue();
-            channel.queueBind(queueName, EXCHANGENAME, "cache");
+            channel.queueBind(queueName, EXCHANGENAME, "cache.update.all");
             globalChannel = channel;
         } catch (IOException e1) {
             e1.printStackTrace();

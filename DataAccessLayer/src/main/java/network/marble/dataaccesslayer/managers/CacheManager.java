@@ -13,10 +13,14 @@ public class CacheManager {
     private static CacheManager instance;
     private org.ehcache.CacheManager cacheManager;
     @Getter private Cache<UUID, Object> cache;
+    @Getter private RabbitManager rabbitManager;
 
-    public CacheManager() {
+    private CacheManager() {
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true);
         cache = cacheManager.createCache("main", CacheConfigurationBuilder.newCacheConfigurationBuilder(UUID.class, Object.class, ResourcePoolsBuilder.heap(100)).build());
+
+        rabbitManager = new RabbitManager();
+        rabbitManager.startQueueConsumer();
     }
 
     public void cleanUp() {

@@ -1,13 +1,19 @@
 package network.marble.dataaccesslayer.models.plugins.currency;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 import okhttp3.Request;
 import org.bukkit.Material;
 
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Currency extends BaseModel<Currency> {
     public Currency(){
         super("plugins/currency/currencies", "currencies", "currency");
@@ -34,13 +40,5 @@ public class Currency extends BaseModel<Currency> {
     @Override
     public Class<?> getTypeClass() {
         return Currency.class;
-    }
-
-    @Override
-    public String toString() {
-        return "Currency{" +
-                "name='" + name + '\'' +
-                ", material='" + material + '\'' +
-                "} " + super.toString();
     }
 }

@@ -1,11 +1,17 @@
 package network.marble.dataaccesslayer.models.plugins.moderation;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 import java.util.UUID;
 
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Report extends BaseModel<Report> {
     public Report(){
         super("plugins/moderation/reports", "reports", "report");
@@ -44,21 +50,5 @@ public class Report extends BaseModel<Report> {
     @Override
     public Class<?> getTypeClass() {
         return Report.class;
-    }
-
-    @Override
-    public String toString() {
-        return "Report{" +
-                "followup_id=" + followup_id +
-                ", requestee_id=" + requestee_id +
-                ", accused_id=" + accused_id +
-                ", assignee_id=" + assignee_id +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                ", created_at=" + created_at +
-                ", assigned_at=" + assigned_at +
-                ", solved_at=" + solved_at +
-                ", closed_at=" + closed_at +
-                "} " + super.toString();
     }
 }

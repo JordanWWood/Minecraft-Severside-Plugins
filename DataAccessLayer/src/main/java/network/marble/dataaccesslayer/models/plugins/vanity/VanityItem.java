@@ -1,8 +1,11 @@
 package network.marble.dataaccesslayer.models.plugins.vanity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 import okhttp3.Request;
@@ -10,6 +13,9 @@ import okhttp3.Request;
 import java.util.List;
 import java.util.Map;
 
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VanityItem extends BaseModel<VanityItem> {
     public VanityItem(){
         super("plugins/vanity", "vanities", "vanity");
@@ -38,15 +44,5 @@ public class VanityItem extends BaseModel<VanityItem> {
 
     public VanityItem getByName(String name) throws APIException {
         return getSingle(urlEndPoint+"/name/"+name);
-    }
-
-    @Override
-    public String toString() {
-        return "VanityItem{" +
-                "name='" + name + '\'' +
-                ", consumable=" + consumable +
-                ", price=" + price +
-                ", category='" + category + '\'' +
-                "} " + super.toString();
     }
 }

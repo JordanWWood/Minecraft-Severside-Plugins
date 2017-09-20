@@ -1,8 +1,11 @@
 package network.marble.dataaccesslayer.models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 import okhttp3.Request;
@@ -11,6 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GameMode extends BaseModel<GameMode> {
     public GameMode(){
         super("games/modes", "gamemodes", "gamemode");
@@ -25,7 +31,7 @@ public class GameMode extends BaseModel<GameMode> {
     @Getter @Setter
     public String description;
 
-    public Map<String, Object> iconMap;
+    public String iconMap;
 
     @Getter @Setter
     public boolean isLive;
@@ -75,24 +81,5 @@ public class GameMode extends BaseModel<GameMode> {
     @Override
     public Class<?> getTypeClass() {
         return GameMode.class;
-    }
-
-    @Override
-    public String toString() {
-        return "GameMode{" +
-                "name='" + name + '\'' +
-                ", game_id=" + game_id +
-                ", description='" + description + '\'' +
-                ", iconMap=" + iconMap +
-                ", isLive=" + isLive +
-                ", isActive=" + isActive +
-                ", isBeta=" + isBeta +
-                ", minPlayerCount=" + minPlayerCount +
-                ", maxPlayerCount=" + maxPlayerCount +
-                ", minJoiningTeamSize=" + minJoiningTeamSize +
-                ", maxJoiningTeamSize=" + maxJoiningTeamSize +
-                ", minTeamCount=" + minTeamCount +
-                ", maxTeamCount=" + maxTeamCount +
-                "} " + super.toString();
     }
 }

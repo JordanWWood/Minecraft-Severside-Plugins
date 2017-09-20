@@ -1,5 +1,12 @@
 package network.marble.dataaccesslayer.models.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import lombok.ToString;
+
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Moderation {
     public boolean muted;
 
@@ -8,14 +15,4 @@ public class Moderation {
     public long mute_end_time;
 
     public boolean banned;
-
-    @Override
-    public String toString() {
-        return "Moderation{" +
-                "muted=" + muted +
-                ", ban_end_time=" + ban_end_time +
-                ", mute_end_time=" + mute_end_time +
-                ", banned=" + banned +
-                '}';
-    }
 }

@@ -1,9 +1,12 @@
 package network.marble.dataaccesslayer.models.plugins.translations;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 import okhttp3.Request;
@@ -13,6 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Phrase extends BaseModel<Phrase> {
     public Phrase(){
         super("plugins/translations/phrases", "phrases", "phrase");
@@ -39,14 +45,5 @@ public class Phrase extends BaseModel<Phrase> {
     @Override
     public Class<?> getTypeClass() {
         return Phrase.class;
-    }
-
-    @Override
-    public String toString() {
-        return "Phrase{" +
-                "description='" + description + '\'' +
-                ", name='" + name + '\'' +
-                ", translations=" + translations +
-                "} " + super.toString();
     }
 }

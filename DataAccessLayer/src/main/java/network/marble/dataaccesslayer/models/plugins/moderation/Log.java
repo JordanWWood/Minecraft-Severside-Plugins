@@ -1,4 +1,5 @@
-package network.marble.dataaccesslayer.models;
+package network.marble.dataaccesslayer.models.plugins.moderation;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -7,28 +8,21 @@ import lombok.Setter;
 import lombok.ToString;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 @Data
 @ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GameAnalytic extends BaseModel<GameAnalytic> {
-
-    public GameAnalytic() {
-        super("games/analytics", "gameanalytics", "gameanalytic");
-    }
+public class Log {
 
     @Getter @Setter
-    public UUID game_id;
+    private long timestamp;
 
     @Getter @Setter
-    public long timestamp;
+    private UUID user_id;
 
     @Getter @Setter
-    public Object data;
-
-    @Override
-    public Class<?> getTypeClass() {
-        return GameAnalytic.class;
-    }
+    private String message;
 }

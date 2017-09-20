@@ -1,10 +1,16 @@
 package network.marble.dataaccesslayer.models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 import okhttp3.Request;
 
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GlobalVariable extends BaseModel<GlobalVariable> {
     public GlobalVariable(){
         super("globalvariables", "globalvariables", "globalvariable");
@@ -29,13 +35,5 @@ public class GlobalVariable extends BaseModel<GlobalVariable> {
     @Override
     public Class<?> getTypeClass() {
         return GlobalVariable.class;
-    }
-
-    @Override
-    public String toString() {
-        return "GlobalVariable{" +
-                "name='" + name + '\'' +
-                ", value='" + value + '\'' +
-                "} " + super.toString();
     }
 }

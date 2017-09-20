@@ -4,6 +4,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.managers.CacheManager;
+import network.marble.dataaccesslayer.managers.TimerManager;
 import network.marble.dataaccesslayer.models.GlobalVariable;
 
 import java.io.IOException;
@@ -21,9 +22,11 @@ public class DataAccessLayer
     private static String rabbitMQUrl;
 
     public Logger logger;
+    public TimerManager timerManager;
 
     public DataAccessLayer(Logger logger) {
         this.logger = logger;
+        this.timerManager = TimerManager.getInstance();
     }
 
     public Connection getRabbitMQConnection() {

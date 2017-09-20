@@ -2,12 +2,19 @@ package network.marble.dataaccesslayer.models;
 
 
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 import okhttp3.Request;
 
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Game extends BaseModel<Game> {
     public Game(){
         super("games", "games", "game");
@@ -22,7 +29,7 @@ public class Game extends BaseModel<Game> {
     @Getter @Setter
     public String description;
 
-    public Map<String, Object> iconMap;
+    public String iconMap;
 
     @Getter @Setter
     public Boolean isLive;
@@ -54,18 +61,5 @@ public class Game extends BaseModel<Game> {
     @Override
     public Class<?> getTypeClass() {
         return Game.class;
-    }
-
-    @Override
-    public String toString() {
-        return "Game{" +
-                "name='" + name + '\'' +
-                ", filename='" + filename + '\'' +
-                ", description='" + description + '\'' +
-                ", iconMap=" + iconMap +
-                ", isLive=" + isLive +
-                ", isActive=" + isActive +
-                ", isBeta=" + isBeta +
-                "} " + super.toString();
     }
 }

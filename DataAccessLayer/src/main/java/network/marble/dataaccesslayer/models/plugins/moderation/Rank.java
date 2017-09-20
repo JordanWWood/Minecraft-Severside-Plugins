@@ -1,9 +1,12 @@
 package network.marble.dataaccesslayer.models.plugins.moderation;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 import okhttp3.Request;
@@ -12,6 +15,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+@Data
+@ToString(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Rank extends BaseModel<Rank> {
     public Rank(){
         super("plugins/moderation/ranks", "ranks", "rank");
@@ -32,38 +38,15 @@ public class Rank extends BaseModel<Rank> {
     @Getter @Setter
     public boolean isPriority;
 
-    @Setter
-    public String permissions;
+    @Getter @Setter
+    public List<String> permissions;
 
     public Rank getFull(UUID id) throws APIException {
         return getSingle(urlEndPoint+"/"+id.toString()+"/full");
     }
 
-	public List<String> getPermissions() {
-        ObjectMapper mapper = new ObjectMapper();
-        JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, String.class);
-        try {
-            return mapper.readValue(this.permissions, type);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     @Override
     public Class<?> getTypeClass() {
         return Rank.class;
-    }
-
-    @Override
-    public String toString() {
-        return "Rank{" +
-                "name='" + name + '\'' +
-                ", prefix='" + prefix + '\'' +
-                ", suffix='" + suffix + '\'' +
-                ", parent_id=" + parent_id +
-                ", isPriority=" + isPriority +
-                ", permissions='" + permissions + '\'' +
-                "} " + super.toString();
     }
 }
