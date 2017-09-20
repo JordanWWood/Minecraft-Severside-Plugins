@@ -22,12 +22,7 @@ public class RabbitManager {
     private Channel globalChannel;
     static Consumer consumer;
 
-    private String queueName;
     private final String EXCHANGENAME = "plugins";
-
-    public RabbitManager() {
-        queueName = "mg." + MiniGameCore.instanceId.toString();
-    }
 
     public void startQueueConsumer() {
         Channel channel = getChannel();
@@ -37,7 +32,7 @@ public class RabbitManager {
         }
         if (consumer == null) consumer = new RabbitConsumer(channel);
         try {
-            channel.basicConsume( queueName, true, consumer);
+            channel.basicConsume( getQueueName(), true, consumer);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -45,7 +40,7 @@ public class RabbitManager {
 
     public void stopQueueConsumer() {
         if (globalChannel != null) try {
-            globalChannel.queueDelete(queueName);
+            globalChannel.queueDelete(getQueueName());
             globalChannel.abort();
         } catch (IOException e) {
             e.printStackTrace();
@@ -65,15 +60,18 @@ public class RabbitManager {
                 return null;
             }
             channel.exchangeDeclare(EXCHANGENAME, "topic");
-            channel.queueDeclare(queueName, false, true, false , null);
+            Map<String, Object> args = new HashMap<String, Object>();
+            args.put("x-expires", MiniGameCore.TTLMillis+(30000));
+            channel.queueDeclare(getQueueName(), false, false, true, args);
 
-            String[] keys = new String[3];
-            keys[0] = "mg";
-            keys[1] = "server";
-            keys[2] = MiniGameCore.instanceId.toString();
+            String[] keys = new String[2];
+            keys[0] = "mg.server."+MiniGameCore.instanceId;
+            keys[1] = "mg.server.all";
             for (String bindingKey : keys) {
-                channel.queueBind(queueName, EXCHANGENAME, bindingKey);
+                channel.queueBind(getQueueName(), EXCHANGENAME, bindingKey);
             }
+            
+            MiniGameCore.logger.info("mg.server."+MiniGameCore.instanceId);
             globalChannel = channel;
         } catch (IOException e1) {
             e1.printStackTrace();
@@ -81,7 +79,11 @@ public class RabbitManager {
         return globalChannel;
     }
     
-    public <T extends Message> void sendMessageUndocumented(T message, String key) {
+    private String getQueueName() {
+		return "mg." + MiniGameCore.instanceId;
+	}
+
+	public <T extends Message> void sendMessageUndocumented(T message, String key) {
         sendMessage("atlas."+key, message);
     }
 
@@ -97,14 +99,19 @@ public class RabbitManager {
         if (respondToMessage.respondTo != null && !respondToMessage.respondTo.isEmpty()) sendMessage(respondToMessage.respondTo, message);
     }
 
+    public <T extends Message> void respondToMessage(T message) {
+    	if (message.respondTo != null && !message.respondTo.isEmpty()) sendMessage(message.respondTo, message);
+    }
+
     public <T extends Message> void sendMessageToServer(T message) {
         String id = (MiniGameCore.instanceId == null ? new UUID(0L, 0L) : MiniGameCore.instanceId).toString();
         sendMessage("atlas.mg."+id, message);
+        MiniGameCore.logger.info("MESSAGING KEY FOR SERVER" + "atlas.mg."+id);
     }
 
     public <T extends Message> void sendMessage(String routingkey, T message) {
         Map<String, Object> headers = new HashMap<>();
-        headers.put("message-type", message.getId());
+        headers.put("message-id", message.getId());
         headers.put("server-id", MiniGameCore.getInstanceId().toString());
         AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().headers(headers).build();
         Channel channel = getChannel();
@@ -114,7 +121,7 @@ public class RabbitManager {
         }
         try {
             channel.basicPublish(EXCHANGENAME, routingkey, properties, message.getBodyBytes());
-            Bukkit.getLogger().info("PUBLISHED MESSAGE ID " + message.getId());
+            MiniGameCore.logger.info("PUBLISHED MESSAGE ID " + message.getId());
         } catch (IOException e) {
             e.printStackTrace();
         }

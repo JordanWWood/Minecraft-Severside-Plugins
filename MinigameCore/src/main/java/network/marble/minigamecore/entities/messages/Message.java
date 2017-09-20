@@ -1,6 +1,7 @@
 package network.marble.minigamecore.entities.messages;
 
 import com.google.gson.Gson;
+
 import lombok.Getter;
 import network.marble.minigamecore.managers.RabbitManager;
 
@@ -22,6 +23,10 @@ public class Message {
         return new Gson().toJson(this);
     }
 
+    public <T extends Message> void respondTo() {
+    	RabbitManager.getInstance().respondToMessage(this);
+    }
+    
     public <T extends Message> void respondTo(T message) {
         RabbitManager.getInstance().respondToMessage(this, message);
     }

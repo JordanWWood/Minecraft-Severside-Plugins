@@ -24,8 +24,8 @@ public class MapConfig {
                 spawns.getPrimary().get(number).getX(),
                 spawns.getPrimary().get(number).getY(),
                 spawns.getPrimary().get(number).getZ(),
-                spawns.getPrimary().get(number).getPitch(),
-                spawns.getPrimary().get(number).getYaw()
+                spawns.getPrimary().get(number).getYaw(),
+                spawns.getPrimary().get(number).getPitch()
         );
     }
 }

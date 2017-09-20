@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,12 +31,12 @@ import network.marble.game.mode.survivalgames.managers.VoteManager;
 import network.marble.game.mode.survivalgames.utils.FontFormat;
 import network.marble.inventoryapi.api.InventoryAPI;
 import network.marble.messagelibrary.api.MessageLibrary;
-import network.marble.messagelibrary.api.MessageType;
 import network.marble.minigamecore.MiniGameCore;
 import network.marble.minigamecore.entities.events.game.GameStatusChangeEvent;
 import network.marble.minigamecore.entities.game.GameStatus;
 import network.marble.minigamecore.entities.player.MiniGamePlayer;
 import network.marble.minigamecore.entities.player.PlayerType;
+import network.marble.minigamecore.managers.AnalyticsManager;
 import network.marble.minigamecore.managers.CommandManager;
 import network.marble.minigamecore.managers.EventManager;
 import network.marble.minigamecore.managers.GameManager;
@@ -64,6 +65,7 @@ public class StateListener implements Listener {
     
     @Getter static final String prefix = "&8[&6MCSG&8] ";
     private static String scoreboardTitle = ChatColor.GOLD +""+ ChatColor.BOLD + "Survival Games";
+    @Getter private static long startTime;
 
     @EventHandler
     public void onStateChangeEvent(GameStatusChangeEvent e) {
@@ -88,7 +90,7 @@ public class StateListener implements Listener {
     private void lobbyingInit() {
     	LobbyListener.waiting = new Scoreboard(scoreboardTitle);
         LobbyListener.countDown = new Scoreboard(scoreboardTitle);
-    	
+        
     	TextRow timerTitle = new TextRow(ChatColor.GOLD +""+ ChatColor.BOLD+"Starting In:");
     	LobbyListener.countDown.addRows(new SpacerRow(), timerTitle);
     	TextRow waiting = new TextRow("Awaiting players...");
@@ -126,25 +128,25 @@ public class StateListener implements Listener {
 		ScoreboardManager.getInstance().setScoreboard(PreStartListener.countDown);
 		
 		String votedMap = VoteManager.getInstance().getMostVoted().getName();
-		TimerManager.getInstance().runEvery((t, b) -> {
-        	Bukkit.broadcastMessage(FontFormat.translateString(prefix + "&2Chest loot has been refreshed!"));
+		TimerManager.getInstance().runIn((t, b) -> {
+        	Bukkit.broadcastMessage(FontFormat.translateString(prefix + "&2Chests have been refilled!"));
         	LootManager.refillChests();
         }, 15, TimeUnit.MINUTES);
 		
     	InventoryAPI.disableMenus();
         // Unregister events from previous stage
-        EventManager.getInstance().unregisterEvent(lobbyListener);
+        
         CommandManager.getInstance().unregisterCommand(vote);//TODO Check why this is broken
 
         WorldManager.getInstance(false).loadWorld(votedMap);
         StateListener.setCurrentGameWorld(votedMap);
-        
-        Bukkit.getWorld(currentGameWorld).setDifficulty(Difficulty.NORMAL);
-        Bukkit.getWorld(currentGameWorld).setPVP(true);
-        Bukkit.getWorld(currentGameWorld).setTime(8000);//8 AM
-        Bukkit.getWorld(currentGameWorld).setAutoSave(false);
-        Bukkit.getWorld(currentGameWorld).setStorm(false);
-        Bukkit.getWorld(currentGameWorld).setThundering(false);
+        World world = Bukkit.getWorld(currentGameWorld);
+        world.setDifficulty(Difficulty.NORMAL);
+        world.setPVP(true);
+        world.setTime(8000);//8 AM
+        world.setAutoSave(false);
+        world.setStorm(false);
+        world.setThundering(false);
         
         Bukkit.getServer().setSpawnRadius(0);
         
@@ -157,8 +159,6 @@ public class StateListener implements Listener {
             // Tell minigames core to clean up
             e.printStackTrace();
         }
-        System.out.println("Number of players: " + Bukkit.getOnlinePlayers().size());
-        System.out.println("Number of podiums: " + mapConfig.getSpawns().getPrimary().size());
         
         
         
@@ -166,7 +166,7 @@ public class StateListener implements Listener {
         	TextComponent start = new TextComponent(FontFormat.translateString(prefix + ChatColor.GOLD + "" + mapConfig.getInfo().getName() + ChatColor.DARK_GREEN + " by "));
         	TextComponent link = new TextComponent(ChatColor.GOLD + mapConfig.getInfo().getAuthor());
         	link.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, mapConfig.getInfo().getLink()));
-        	link.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(MessageType.LORE+"Visit their website!").create()));
+        	link.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Visit their website!").create()));
         	TextComponent end = new TextComponent(ChatColor.DARK_GREEN + " has been selected! Game will begin in 5 seconds.");
         	end.setColor(ChatColor.DARK_GREEN);
         	start.addExtra(link);
@@ -179,6 +179,7 @@ public class StateListener implements Listener {
         	//Register events
         	if(preStartListener == null){
             	preStartListener = new PreStartListener();
+            	EventManager.getInstance().unregisterEvent(lobbyListener);
             	EventManager.getInstance().registerEvent(preStartListener);
             }
         	
@@ -188,19 +189,22 @@ public class StateListener implements Listener {
         	
         	 // Switch world
         	Bukkit.getScheduler().runTask(MiniGameCore.instance, () -> {
-        		Location center = mapConfig.getPodiumLocation(0).getWorld().getSpawnLocation(); 
 	            int i = 0;
 	            for (UUID p : GameListener.alivePlayers) {
 	            	Player player = Bukkit.getPlayer(p);
 	            	if(player != null){
 		            	player.setGameMode(org.bukkit.GameMode.SURVIVAL);
 		            	player.getInventory().clear();
-		                player.teleport(lookAt(mapConfig.getPodiumLocation(i), center));
+		                player.teleport(mapConfig.getPodiumLocation(i));
 		                i++;
+		                if(i == mapConfig.getSpawns().getPrimary().size()) i = 0;
 	            	}else{//safety catch
 	            		GameListener.alivePlayers.remove(p);
 	            		GameListener.deadPlayers.add(p);
 	            	}
+	            }
+	            for (MiniGamePlayer p : PlayerManager.getPlayers(PlayerType.SPECTATOR)) {
+	                p.getPlayer().teleport(mapConfig.getPodiumLocation(0));
 	            }
         	});
         }, 5L, TimeUnit.SECONDS);
@@ -216,6 +220,11 @@ public class StateListener implements Listener {
 	    			Bukkit.getScheduler().runTask(MiniGameCore.instance, ()->{
 	    				GameManager.setStatus(GameStatus.INGAME);
 	        			Bukkit.broadcastMessage(FontFormat.translateString(prefix+"&6May the odds be ever in your favour!"));
+	        			startTime = System.currentTimeMillis();
+	        			for(MiniGamePlayer p : PlayerManager.getPlayers(PlayerType.PLAYER)){
+	        				AnalyticsManager.getInstance().alterGameModeAnalyticsValue(p.getUserId(), StateListener.mapConfig.getInfo().getName() + ".plays", 1);
+	        	        	AnalyticsManager.getInstance().alterGameModeAnalyticsValue(p.getUserId(), "plays", 1);
+	        			}
 	    			});
 	    		}
 	    	}, 1L, TimeUnit.SECONDS, 12L, TimeUnit.SECONDS);//TODO Temporarily like this due to timer skip bug
@@ -230,7 +239,7 @@ public class StateListener implements Listener {
     	GameListener.gameBoard = new Scoreboard(scoreboardTitle);
     	
     	GameListener.gameBoard.addRows(new SpacerRow(), new TextRow(ChatColor.GOLD + "" + ChatColor.BOLD + "Time Remaining:"));
-    	TextRow timer = new TextRow(ChatColor.GREEN + "" + ChatColor.BOLD + "45:00");
+    	TextRow timer = new TextRow(ChatColor.GREEN + "" + ChatColor.BOLD + "30:00");
     	UUID timerRow = GameListener.gameBoard.addRow(timer);
     	
     	
@@ -252,7 +261,7 @@ public class StateListener implements Listener {
     			DeathmatchStartEvent event = new DeathmatchStartEvent();
                 Bukkit.getServer().getPluginManager().callEvent(event);
     		}
-    	}, 1L, TimeUnit.SECONDS, (45L*60L) + 1L, TimeUnit.SECONDS);
+    	}, 1L, TimeUnit.SECONDS, (30L*60L) + 1L, TimeUnit.SECONDS);
     	ScoreboardManager.getInstance().setScoreboard(GameListener.gameBoard);
     	
     	Bukkit.getWorld(currentGameWorld).setDifficulty(Difficulty.NORMAL);
@@ -272,7 +281,8 @@ public class StateListener implements Listener {
     }
     
     private void finishedInit() {
-    	TimerManager.getInstance().stopTimer(gameTimer);
+    	if(gameTimer != null) TimerManager.getInstance().stopTimer(gameTimer);
+    	EventManager.getInstance().registerEvent(new EndListener());
     	Scoreboard winnerBoard = new Scoreboard(scoreboardTitle);
     	winnerBoard.addRows(new SpacerRow(), new TextRow(ChatColor.GOLD+""+ChatColor.BOLD + "Winner"), new TextRow(FontFormat.translateString(MessageLibrary.getDisplayName(GameListener.winner.getUniqueId()))));
     	ScoreboardManager.getInstance().setScoreboard(winnerBoard);
@@ -292,40 +302,5 @@ public class StateListener implements Listener {
 
     private void endedInit() {
 
-    }
-    
-    public static Location lookAt(Location loc, Location lookAt){
-        //Clone the loc to prevent applied changes to the input loc
-        loc = loc.clone();
-
-        // Values of change in distance (make it relative)
-        double dx = lookAt.getX() - loc.getX();
-        double dy = lookAt.getY() - loc.getY();
-        double dz = lookAt.getZ() - loc.getZ();
-
-        // Set yaw
-        if (dx != 0) {
-            // Set yaw start value based on dx
-            if (dx < 0) {
-                loc.setYaw((float) (1.5 * Math.PI));
-            } else {
-                loc.setYaw((float) (0.5 * Math.PI));
-            }
-            loc.setYaw((float) loc.getYaw() - (float) Math.atan(dz / dx));
-        } else if (dz < 0) {
-            loc.setYaw((float) Math.PI);
-        }
-
-        // Get the distance from dx/dz
-        double dxz = Math.sqrt(Math.pow(dx, 2) + Math.pow(dz, 2));
-
-        // Set pitch
-        loc.setPitch((float) -Math.atan(dy / dxz));
-
-        // Set values, convert to degrees (invert the yaw since Bukkit uses a different yaw dimension format)
-        loc.setYaw(-loc.getYaw() * 180f / (float) Math.PI);
-        loc.setPitch(loc.getPitch() * 180f / (float) Math.PI);
-
-        return loc;
     }
 }

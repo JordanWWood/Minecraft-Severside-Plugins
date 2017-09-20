@@ -1,16 +1,15 @@
 package network.marble.minigamecore.managers;
 
-import network.marble.minigamecore.MiniGameCore;
-import network.marble.minigamecore.entities.timer.Timer;
-import network.marble.minigamecore.entities.timer.TimerType;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+
+import network.marble.minigamecore.MiniGameCore;
+import network.marble.minigamecore.entities.timer.Timer;
+import network.marble.minigamecore.entities.timer.TimerType;
 
 public class TimerManager {
     private static TimerManager instance;
@@ -117,7 +116,7 @@ public class TimerManager {
     }
 
     public void stopTimer(UUID id) {
-        if (timers.containsKey(id)) timers.remove(id);
+        if (id != null && timers.containsKey(id)) timers.remove(id);
     }
 
     public boolean updateTimerTask(UUID id, BiConsumer<Timer, Boolean> task) {

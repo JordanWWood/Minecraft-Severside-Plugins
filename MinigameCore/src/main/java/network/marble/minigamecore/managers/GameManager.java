@@ -1,27 +1,33 @@
 package network.marble.minigamecore.managers;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
+
+import org.bukkit.Bukkit;
 
 import lombok.Getter;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.GameMode;
 import network.marble.minigamecore.MiniGameCore;
-import network.marble.minigamecore.entities.game.GameStatus;
-import network.marble.minigamecore.entities.game.MiniGame;
-import network.marble.minigamecore.entities.task.CoreTickTask;
 import network.marble.minigamecore.entities.events.game.GameAbortedEvent;
 import network.marble.minigamecore.entities.events.game.GameStatusChangeEvent;
-import org.apache.commons.lang.NullArgumentException;
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
+import network.marble.minigamecore.entities.game.GameStatus;
+import network.marble.minigamecore.entities.game.MiniGame;
+import network.marble.minigamecore.entities.messages.GameStatusUpdateMessage;
 
 public class GameManager {
-	private static BukkitTask coreTickTask;
 
 	@Getter private static UUID gameId;
 	@Getter private static GameMode gameMode;
@@ -35,19 +41,27 @@ public class GameManager {
 		games = new HashMap<>();
 		status = GameStatus.INITIALIZING;
 		Init();
-		coreTickTask = new CoreTickTask().runTaskTimerAsynchronously(MiniGameCore.instance, 20, 20);
 	}
 
 	public static void setStatus(GameStatus status) {
-		Bukkit.getServer().getPluginManager().callEvent(new GameStatusChangeEvent(getStatus(), status));
+		MiniGameCore.logger.info("CHANGING STATE FROM " + GameManager.status + " TO " + status);
+		GameStatus oldStatus = GameManager.status;
 		GameManager.status = status;
+		Bukkit.getServer().getPluginManager().callEvent(new GameStatusChangeEvent(oldStatus, status));
+		MiniGameCore.logger.info("STATE CHANGED, MESSAGING ATLAS");
+		
+    	GameStatusUpdateMessage message = new GameStatusUpdateMessage();
+    	message.status = status;
+    	message.sendToServer();
 	}
 
 	public static void progressStatus() {
+		MiniGameCore.logger.info("State progressed");
 		setStatus(GameStatus.values()[status.ordinal() == GameStatus.values().length - 1 ? status.ordinal() : status.ordinal() + 1]);
 	}
 
 	public static void regressStatus() {
+		MiniGameCore.logger.info("State regressed");
 		setStatus(GameStatus.values()[status.ordinal() == 0 ? status.ordinal() : status.ordinal() - 1]);
 	}
 
@@ -63,8 +77,8 @@ public class GameManager {
 			MiniGameCore.logger.info("Unable to find game mode "+gameModeId.toString());
 			return false;
 		}
-		this.gameId = gameMode.game_id;
-		this.gameMode = gameMode;
+		GameManager.gameId = gameMode.game_id;
+		GameManager.gameMode = gameMode;
 		MiniGame miniGame = getMiniGameByUUID(gameMode.game_id);
 		if (miniGame == null) {
 			MiniGameCore.logger.info("Unable to find mini-game for game"+gameMode.game_id.toString());
@@ -72,12 +86,13 @@ public class GameManager {
 		} else MiniGameCore.logger.info("Mini-game "+miniGame.getName()+" found");
 
 		if(!unsetCurrentGame()) return false;
-		this.currentMiniGame = miniGame;
+		GameManager.currentMiniGame = miniGame;
 
-		setStatus(GameStatus.INITIALIZING);
 		MiniGameCore.logger.info("Mini-game "+miniGame.getName()+" set");
+		
 		installMiniGame();
-		setStatus(GameStatus.INITIALIZING); //Secondary set for game entry point
+		MiniGameCore.logger.info("DOING POST INSTALL SET TO INIT");
+		setStatus(GameStatus.INITIALIZING); //Set for game entry point
 		MiniGameCore.logger.info("Mini-game "+miniGame.getName()+" installed");
 		return true;
 	}
@@ -107,9 +122,10 @@ public class GameManager {
 
 	private void Init() {
 		MiniGameCore.logger.info("Loading mini-games");
-		File loc = MiniGameCore.instance.getDataFolder();
+		File loc = new File(MiniGameCore.instance.getDataFolder(),"games");
 
 		if (!loc.exists()) {
+			loc.mkdirs();
 			MiniGameCore.logger.warning("Unable to find mini-games folder ("+loc.getAbsolutePath()+")");
 			return;
 		}
@@ -176,12 +192,7 @@ public class GameManager {
 	}
 
 	public String getMiniGamesList() {
-		String list = "";
-		for(Map.Entry<UUID, MiniGame> entry : games.entrySet()) {
-			list +=entry.getValue().getName()+",";
-		}
-		list += " :"+games.size();
-		return list;
+		return games.entrySet().stream().map(e -> e.getValue().getName()).collect(Collectors.joining(", ")) + " :"+ games.size();
 	}
 
 	public List<MiniGame> getGames() {

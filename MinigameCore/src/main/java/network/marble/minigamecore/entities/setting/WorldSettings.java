@@ -1,19 +1,24 @@
 package network.marble.minigamecore.entities.setting;
 
-import lombok.Getter;
-import org.bukkit.util.Vector;
-
 import java.util.HashMap;
 import java.util.UUID;
+
+import lombok.Getter;
 
 public class WorldSettings {
     @Getter UUID gameModeId;
     @Getter boolean autoSave = false;
-    @Getter HashMap<String, String> gameRules;
+    @Getter HashMap<String, String> gameRules = new HashMap<>();
 
-    @Getter boolean disableLeafDecay = false;
-    @Getter boolean disableBlockBreaking = false;
-    @Getter boolean disableBlockPlacing = false;
+    @Getter boolean disableLeafDecay = true;
+    @Getter boolean disableFireSpread = true;
+
+    @Getter boolean disableBlockIgnite = true;
+    @Getter boolean disableBlockSpread = true;
+    @Getter boolean disableBlockFade = true;
+    @Getter boolean disableBlockBreaking = true;
+    @Getter boolean disableBlockPlacing = true;
+    @Getter boolean disableBlockExplosionDamage = true;
 
     @Getter int ambientSpawnLimit;
 

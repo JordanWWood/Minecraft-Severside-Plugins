@@ -1,24 +1,24 @@
 package network.marble.minigamecore.managers;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandMap;
+import org.bukkit.material.Command;
+import org.bukkit.plugin.SimplePluginManager;
 
 import network.marble.minigamecore.MiniGameCore;
 import network.marble.minigamecore.entities.command.MinigameCommand;
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandMap;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.plugin.SimplePluginManager;
 
 public class CommandManager {
 	private static CommandManager instance;
 	private static List<MinigameCommand> stack = new ArrayList<>();
-	public static boolean restrictionOverride = false;
+	public static boolean restrictionOverride = MiniGameCore.devNetFlagSet;
 	public static List<String> disabledCommands = Arrays.asList("kill", "pl", "?", "reload", "restart", "plugins", "op", "deop", "bukkit:", "minecraft:", "bungee", "version");
 
 	/***
@@ -41,10 +41,10 @@ public class CommandManager {
 		while (i.hasNext())
 		{
 			MinigameCommand commandClass = (MinigameCommand)i.next();
-			commandClass.setAliases(commandClass.COMMANDALIASES);
-			commandMap.register(commandClass.COMMANDALIASES.get(0), commandClass);
+			commandClass.setAliases(commandClass.commandAliases);
+			commandMap.register(commandClass.commandAliases.get(0), commandClass);
 			if (!ignoreStack) stack.add(commandClass);
-			MiniGameCore.logger.info("Command "+String.join(", ",commandClass.COMMANDALIASES) + " registered");
+			MiniGameCore.logger.info("Command "+String.join(", ",commandClass.commandAliases) + " registered");
 		}
 	}
 
@@ -63,48 +63,76 @@ public class CommandManager {
 	 */
 	public <T extends MinigameCommand> void registerCommand(T command, boolean ignoreStack) {
 		MinigameCommand commandClass = (MinigameCommand)command;
-		commandClass.setAliases(commandClass.COMMANDALIASES);
-		getCommandMap().register(commandClass.COMMANDALIASES.get(0), commandClass);
+		commandClass.setAliases(commandClass.commandAliases);
+		getCommandMap().register(commandClass.commandAliases.get(0), commandClass);
 		if (!ignoreStack) stack.add(commandClass);
-		MiniGameCore.logger.info("Command "+String.join(", ",commandClass.COMMANDALIASES)+" registered");
+		MiniGameCore.logger.info("Command "+String.join(", ",commandClass.commandAliases)+" registered");
 	}
 
 	/***
 	 * Unregisters an existing registered command class.
 	 * @param command The command class to unregister
 	 */
-	public <T extends MinigameCommand> void unregisterCommand(T command) {
+	public <T extends MinigameCommand> boolean unregisterCommand(T command) {
 		MinigameCommand commandClass = (MinigameCommand)command;
-		getCommandMap().getCommand(commandClass.COMMANDALIASES.get(0)).unregister(getCommandMap());
-		if (stack.contains(commandClass)) stack.remove(commandClass);
-		MiniGameCore.logger.info("Command "+String.join(", ",commandClass.COMMANDALIASES)+" unregistered");
+		CommandMap commandMap = getCommandMap();
+		boolean result = commandMap.getCommand(commandClass.commandAliases.get(0)).unregister(commandMap);
+		commandClass.getAliases().forEach(aliase -> {
+			try {
+				final Field f = commandMap.getClass().getDeclaredField("knownCommands");
+				f.setAccessible(true);
+				@SuppressWarnings("unchecked")//TODO look for way to properly check
+				Map<String, Command> cmds = (Map<String, Command>) f.get(commandMap);
+				if (cmds.containsKey(aliase)) cmds.remove(aliase);
+				f.set(commandMap, cmds);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+		setCommandMap(commandMap);
+		if (result && stack.contains(commandClass)) stack.remove(commandClass);
+		MiniGameCore.logger.info("Command "+String.join(", ",commandClass.commandAliases)+" unregistered "+(result ? "successfully": "unsuccessfully"));
+		return result;
 	}
 
 	/***
 	 * Unregisters all registered commands.
 	 */
 	public void unregisterAllCommands() {
-		getCommandMap().clearCommands();
-	}
-
-	public void clearStack() {
-		stack.forEach(command -> getCommandMap().getCommand(command.COMMANDALIASES.get(0)).unregister(getCommandMap()));
-		stack.clear();
-	}
-
-	private PluginCommand getCommand(String name) {
-		PluginCommand command = null;
+		CommandMap commandMap = getCommandMap();
 
 		try {
-			Constructor<PluginCommand> c = PluginCommand.class.getDeclaredConstructor(String.class, MiniGameCore.class);
-			c.setAccessible(true);
-			command = c.newInstance(name, MiniGameCore.instance);
-		} catch (SecurityException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
+			final Field f = commandMap.getClass().getDeclaredField("knownCommands");
+			f.setAccessible(true);
+			@SuppressWarnings("unchecked")//TODO look for way to properly check
+			Map<String, Command> cmds = (Map<String, Command>) f.get(commandMap);
+			cmds.clear();
+			f.set(commandMap, cmds);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return command;
+		setCommandMap(commandMap);
 	}
+
+	public void clearStack() {
+		stack.forEach(command -> getCommandMap().getCommand(command.commandAliases.get(0)).unregister(getCommandMap()));
+		stack.clear();
+	}
+
+//	private PluginCommand getCommand(String name) {
+//		PluginCommand command = null;
+//
+//		try {
+//			Constructor<PluginCommand> c = PluginCommand.class.getDeclaredConstructor(String.class, MiniGameCore.class);
+//			c.setAccessible(true);
+//			command = c.newInstance(name, MiniGameCore.instance);
+//		} catch (SecurityException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
+//			e.printStackTrace();
+//		}
+//
+//		return command;
+//	}
 
 	private CommandMap getCommandMap() {
 		CommandMap commandMap = null;
@@ -120,6 +148,19 @@ public class CommandManager {
 		}
 
 		return commandMap;
+	}
+
+	private void setCommandMap(CommandMap map) {
+		try {
+			if (Bukkit.getPluginManager() instanceof SimplePluginManager) {
+				Field f = SimplePluginManager.class.getDeclaredField("commandMap");
+				f.setAccessible(true);
+
+				f.set(Bukkit.getPluginManager(), map);
+			}
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static CommandManager getInstance(){

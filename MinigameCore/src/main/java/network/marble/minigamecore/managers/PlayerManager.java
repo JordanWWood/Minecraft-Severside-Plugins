@@ -1,9 +1,13 @@
 package network.marble.minigamecore.managers;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.NullArgumentException;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
@@ -23,13 +27,11 @@ public class PlayerManager {
 		return players.values().stream().filter(p -> p.playerType == type).collect(Collectors.toList());
 	}
 
-	public static void assignPlayerTraits(Player player) {
+	public static void assignPlayerGameMode(Player player) {
 		MiniGamePlayer miniGamePlayer = getPlayer(player.getUniqueId());
 		if (miniGamePlayer != null) switch (miniGamePlayer.playerType) {
-			case ADMINSTRATOR:
+			case ADMINISTRATOR:
 			case MODERATOR:
-				player.setGameMode(GameMode.CREATIVE);
-				break;
 			case SPECTATOR:
 				player.setGameMode(GameMode.SPECTATOR);
 				break;
@@ -57,6 +59,10 @@ public class PlayerManager {
 		return players.get(id);
 	}
 
+	public static void unregisterPlayer(MiniGamePlayer miniGamePlayer) {
+		unregisterPlayer(miniGamePlayer.id);
+	}
+
 	public static void unregisterPlayer(Player player) {
 		unregisterPlayer(player.getUniqueId());
 	}
@@ -66,22 +72,21 @@ public class PlayerManager {
 	}
 
 	public static MiniGamePlayer getPlayer(Player player){
+		if (player == null) throw new NullArgumentException("player");
 		return getPlayer(player.getUniqueId());
 	}
 
 	public static MiniGamePlayer getPlayer(UUID id) {
+		if (id == null) throw new NullArgumentException("id");
 		if (players.containsKey(id)) return players.get(id);
 		return null;
 	}
 
 	public String getPlayersList() {
-		String list = "";
-		for(Map.Entry<UUID, MiniGamePlayer> entry : players.entrySet()) {
-			Player p = entry.getValue().getPlayer();
-			list += entry.getValue().playerType + "-" + (p == null ? "NULL Player" : p.getDisplayName())+",";
-		}
-		list += " :"+players.size();
-		return list;
+		return players.entrySet().stream().map(e -> {
+			Player p = e.getValue().getPlayer();
+			return e.getValue().playerType + "-" + (p == null ? "NULL Player" : p.getDisplayName());
+		}).collect(Collectors.joining(", ")) + " :"+ players.size();
 	}
 	
 	public static PlayerManager getInstance() {
@@ -92,7 +97,7 @@ public class PlayerManager {
 	public static int getPlayerCount(PlayerType type) {
 		if (type == null) return players.size();
 		int total = 0;
-		for(Entry<UUID, MiniGamePlayer> player : players.entrySet()){
+		for (Entry<UUID, MiniGamePlayer> player : players.entrySet()) {
 			if (player.getValue().playerType == type) total++;
 		}
 		return total;

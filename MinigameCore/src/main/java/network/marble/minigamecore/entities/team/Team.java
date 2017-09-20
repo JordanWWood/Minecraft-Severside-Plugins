@@ -47,7 +47,7 @@ public class Team {
 	}
 
 	public String getTeamIdentifier(){
-		return usePlayerNameAsTeamIdentifier ? players.get(0).getPlayer().getDisplayName() : teamIdentifier;
+		return usePlayerNameAsTeamIdentifier ? players.size() < 0 ? players.get(0).getPlayer().getDisplayName() : "Empty Team" : teamIdentifier;
 	}
 
 	public WrapperPlayServerScoreboardTeam getScoreboardTeamPacket() {

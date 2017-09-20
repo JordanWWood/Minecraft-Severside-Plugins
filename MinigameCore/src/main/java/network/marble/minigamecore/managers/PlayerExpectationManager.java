@@ -39,6 +39,14 @@ public class PlayerExpectationManager {
         if (expectedPlayerRanks.containsKey(uuid)) removePrePlayerRank(uuid);
         return type;
     }
+    
+    public static void clearExpectations() {
+    	expectedPlayerRanks.clear();
+    	for(Integer i : cancelTaskIds.values()){
+    		Bukkit.getScheduler().cancelTask(i);
+    	}
+    	cancelTaskIds.clear();
+    }
 
 
     public static PlayerExpectationManager getInstance() {

@@ -6,6 +6,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class EventManager {
@@ -19,6 +20,14 @@ public class EventManager {
     public void registerEvent(Listener listener, boolean ignoreStack) {
         Bukkit.getServer().getPluginManager().registerEvents(listener, MiniGameCore.instance);
         if (!ignoreStack) stack.add(listener);
+    }
+
+    public void registerEvents(Listener... listeners) {
+        registerEvents(false, listeners);
+    }
+
+    public void registerEvents(boolean ignoreStack, Listener... listeners) {
+        Arrays.asList(listeners).forEach( listener -> registerEvent(listener, ignoreStack));
     }
 
     public void registerEvents(List<Listener> listeners) {

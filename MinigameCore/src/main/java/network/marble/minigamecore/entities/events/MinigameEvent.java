@@ -4,7 +4,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 public class MinigameEvent extends Event {
-	private static final HandlerList handlers = new HandlerList();
+	private final static HandlerList handlers = new HandlerList();
 
     public MinigameEvent() {
         super(false);
@@ -13,12 +13,13 @@ public class MinigameEvent extends Event {
     public MinigameEvent(boolean isAsync) {
         super(isAsync);
     }
-
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
+    
     public static HandlerList getHandlerList() {
-        return handlers;
-    }
+		return handlers;
+	}
+
+	@Override
+	public HandlerList getHandlers() {
+		return handlers;
+	}
 }

@@ -1,14 +1,17 @@
 package network.marble.minigamecore.utils;
 
-import network.marble.minigamecore.MiniGameCore;
-import org.apache.commons.io.IOUtils;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+
+import org.apache.commons.io.IOUtils;
 
 public class ZipUtils {
     public static String unzipFile(String zipLocation, String fileToUnzip) throws IOException {

@@ -5,13 +5,14 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.UUID;
 
 public class LockFile {
     public static String getFileLocation()
     {
-        return MiniGameCore.instance.getDataFolder().getAbsolutePath()+"/minigamescore.lock";
+        return MiniGameCore.instance.getDataFolder().getAbsolutePath()+"/../minigamescore.lock";
     }
 
     public static File getFile()
@@ -23,7 +24,7 @@ public class LockFile {
     {
         if (!checkLockFile()) try {
             boolean result = getFile().createNewFile();
-            if (result) FileUtils.writeStringToFile(getFile(), uuid.toString());
+            if (result) FileUtils.writeStringToFile(getFile(), uuid.toString(), Charset.defaultCharset());
             return result;
         } catch (IOException e) {
             e.printStackTrace();
@@ -43,7 +44,7 @@ public class LockFile {
 
     public static UUID getLockFileUUID(){
         try {
-            List<String> lines = FileUtils.readLines(getFile());
+            List<String> lines = FileUtils.readLines(getFile(), Charset.defaultCharset());
             return lines.size() > 0 ? UUID.fromString(lines.get(0)) : null;
         } catch (IOException e) {
             e.printStackTrace();

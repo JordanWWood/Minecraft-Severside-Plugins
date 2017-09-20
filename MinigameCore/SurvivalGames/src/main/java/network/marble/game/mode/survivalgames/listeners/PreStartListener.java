@@ -2,6 +2,7 @@ package network.marble.game.mode.survivalgames.listeners;
 
 import java.util.UUID;
 
+import org.bukkit.GameMode;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -9,11 +10,14 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.vehicle.VehicleCreateEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.util.Vector;
 
+import network.marble.minigamecore.entities.events.player.PlayerDisconnectEvent;
+import network.marble.minigamecore.entities.player.PlayerType;
+import network.marble.minigamecore.managers.PlayerManager;
 import network.marble.scoreboards.entities.scoreboard.Scoreboard;
 
 public class PreStartListener implements Listener {
@@ -25,25 +29,15 @@ public class PreStartListener implements Listener {
         Vector from = new Vector(e.getFrom().toVector().getX(), 0, e.getFrom().toVector().getZ());
         Vector to = new Vector(e.getTo().toVector().getX(), 0, e.getTo().toVector().getZ());
 
-        if (!from.equals(to))
+        if (!from.equals(to) && PlayerManager.getPlayer(e.getPlayer()).playerType == PlayerType.PLAYER && e.getPlayer().getGameMode() == GameMode.SURVIVAL)
             e.setCancelled(true);
     }
-    //TODO fix leaving
     
     @EventHandler
-    public void onKick(PlayerKickEvent e) {
-    	killPlayer(e.getPlayer().getUniqueId());
-    }
-    
-    @EventHandler
-    public void onQuit(PlayerQuitEvent e) {
-    	killPlayer(e.getPlayer().getUniqueId());
-    }
-    
-    private void killPlayer(UUID p){
-    	if(GameListener.alivePlayers.remove(p)){
-    		GameListener.deadPlayers.add(p);
-    	}
+    public void onDisconnect(PlayerDisconnectEvent e) {
+    	if(!GameListener.deadPlayers.contains(e.getMiniGamePlayer().id))
+    		GameListener.killPlayer(e.getMiniGamePlayer().getPlayer(), e.getMiniGamePlayer().playerType, false);
+    	GameListener.deadPlayers.remove(e.getMiniGamePlayer().id);
     }
     
     @EventHandler
@@ -53,6 +47,16 @@ public class PreStartListener implements Listener {
     
     @EventHandler
     public void onBurn(EntityCombustEvent e) {
+    	e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onBoat(VehicleCreateEvent e) {
+    	e.setCancelled(true);
+    }
+    
+    @EventHandler
+    public void onRide(VehicleEnterEvent e) {
     	e.setCancelled(true);
     }
     

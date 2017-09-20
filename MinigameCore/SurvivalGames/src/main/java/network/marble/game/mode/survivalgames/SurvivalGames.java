@@ -26,7 +26,7 @@ public class SurvivalGames implements MiniGame {
 			private static final long serialVersionUID = 1L;
 		{
             TeamSetup ts = new TeamSetup();
-            ts.minimumNumberOfPlayers = 3;
+            ts.minimumNumberOfPlayers = 6;
             ts.maximumNumberOfPlayers = 24;
             ts.usePlayerNameAsTeamIdentifier = true;
             ts.areEnemyInvisibles = false;
@@ -50,7 +50,7 @@ public class SurvivalGames implements MiniGame {
 
 	@Override
 	public UUID getGameId() {
-		return UUID.fromString("7a4605a5-4508-4277-b91b-495a38878b58");
+		return UUID.fromString("40b656ce-1a32-4ce8-a1bf-30082f4fd59a");
 	}
 
 	@Override

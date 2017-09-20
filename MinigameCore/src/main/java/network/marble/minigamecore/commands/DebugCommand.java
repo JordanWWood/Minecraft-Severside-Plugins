@@ -40,7 +40,7 @@ public class DebugCommand implements CommandExecutor {
                             }
                             PlayerType playerType;
                             try {
-                                playerType = args.length < 3 ? PlayerType.PLAYER : PlayerType.valueOf(args[2]);
+                                playerType = args.length < 3 ? PlayerType.PLAYER : PlayerType.valueOf(args[2].toUpperCase());
                             } catch (IllegalArgumentException e) {
                                 playerType = PlayerType.PLAYER;
                             }
@@ -56,10 +56,10 @@ public class DebugCommand implements CommandExecutor {
                     sender.sendMessage("Restriction override set to " + CommandManager.restrictionOverride);
                 	break;
                 default:
-                    sender.sendMessage("Sorry no command here by that name");
+                    sender.sendMessage("Unknown command!");
                 break;
             }
-        } else sender.sendMessage("you no cmd, get fucked shorty");
+        } else sender.sendMessage("Unknown command!");
         return false;
     }
 }

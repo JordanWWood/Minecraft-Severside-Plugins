@@ -86,7 +86,7 @@ public class VoteManager {
     
     @Synchronized("readLock")
     public boolean removeVote(int pos, Rank rank) {
-    	int weight = (rank == null) ? 1 : RankWeight.valueOf(rank.getName().toUpperCase()).getWeight();
+    	int weight = (rank == null) ? 1 : RankWeight.findBySimpleName(rank.getName()).getWeight();
         if (!voteStore.containsKey(pos))
             return false;
 
@@ -133,7 +133,7 @@ public class VoteManager {
         MEDIA("Media", 4),
         HELPER("Helper", 4),
         MOD("Moderator", 4),
-        SRMOD("Sr. Moderator", 4),
+        SENIORMODERATOR("Senior Moderator", 4),
         ADMIN("Administrator", 4),
         DEV("Developer", 4),
         OWNER("Owner", 4);
@@ -144,6 +144,15 @@ public class VoteManager {
         RankWeight(String simpleName, int weight) {
             this.simpleName = simpleName;
             this.weight = weight;
+        }
+
+        public static RankWeight findBySimpleName(String name){
+            for(RankWeight rw : values()){
+                if(rw.simpleName.equals(name)){
+                    return rw;
+                }
+            }
+            return null;
         }
     }
 }

@@ -24,8 +24,8 @@ public class CoreCommand extends MinigameCommand {
 
 	public CoreCommand() {
 		super("mgc");
-		this.CANBERUNBY = Arrays.asList(PlayerType.ADMINSTRATOR);
-		this.COMMANDALIASES = Arrays.asList("mgc", "minigamecore");
+		this.canBeRunBy = Arrays.asList(PlayerType.ADMINISTRATOR);
+		this.commandAliases = Arrays.asList("mgc", "minigamecore");
 		this.setDescription("Core Commands for Minigame Core");
 	}
 

@@ -10,16 +10,7 @@ import java.util.UUID;
 public class PartyManager {
     private static PartyManager instance;
 
-    private static List<Party> parties = new ArrayList<Party>();
-
-    public boolean isInParty(MiniGamePlayer player) {
-        return isInParty(player.id);
-    }
-
-    public boolean isInParty(UUID id) {
-        if (parties.size() <= 0) return false;
-        return getPartyByPlayers(id) != null;
-    }
+    private static List<Party> parties = new ArrayList<>();
 
     public Party getPartyByPlayers(MiniGamePlayer player) {
         return getPartyByPlayers(player.id);

@@ -16,7 +16,8 @@ import java.util.UUID;
 public class DeathmatchListener implements Listener {
     @Getter @Setter private static int currentDamageRadius = 30;
     private Map<UUID, Long> lastStruck = new HashMap<>();
-
+    Vector dmMid = StateListener.mapConfig.getGame().getDeathMatch().getCenter();
+    
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player p = event.getPlayer();
@@ -24,9 +25,8 @@ public class DeathmatchListener implements Listener {
         if (p.getGameMode() == GameMode.SPECTATOR) return;
 
         Vector pLocation = p.getLocation().toVector();
-        Vector spawnLocation = p.getWorld().getSpawnLocation().toVector();
 
-        if (!liesInCircle(pLocation.getX(), pLocation.getZ(), spawnLocation.getX(), spawnLocation.getZ(), currentDamageRadius)) {
+        if (!liesInCircle(pLocation.getX(), pLocation.getZ(), dmMid.getX(), dmMid.getZ(), currentDamageRadius)) {
             if (!lastStruck.containsKey(p.getUniqueId()) || (lastStruck.get(p.getUniqueId()) + 1000L < System.currentTimeMillis())) {
                 event.getPlayer().getWorld().strikeLightning(p.getLocation());
 

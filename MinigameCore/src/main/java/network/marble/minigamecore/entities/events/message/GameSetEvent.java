@@ -7,7 +7,7 @@ public class GameSetEvent extends MinigameEvent {
     public GameModeSetMessage message;
 
     public GameSetEvent(GameModeSetMessage message) {
-        super(true);
+        super(false);
         this.message = message;
     }
 }

@@ -114,33 +114,29 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>nexus</id>
-			<url>http://*******:8081/repository/maven-snapshots</url>
-		</repository>
 	</repositories>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot</artifactId>
-			<version>1.12-R0.1-SNAPSHOT</version>
+			<version>1.12.1-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.12-R0.1-SNAPSHOT</version>
+			<version>1.12.1-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>craftbukkit</artifactId>
-			<version>1.12-R0.1-SNAPSHOT</version>
+			<version>1.12.1-R0.1-SNAPSHOT</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/craftbukkit-1.12.jar</systemPath>
+			<systemPath>${project.basedir}/lib/craftbukkit-1.12.1.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -160,7 +156,7 @@
 		<dependency>
 			<groupId>com.comphenix.protocol</groupId>
 			<artifactId>ProtocolLib-API</artifactId>
-			<version>4.2.1</version>
+			<version>4.4.0-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -180,23 +176,23 @@
 
 		<dependency>
 			<groupId>network.marble</groupId>
-			<artifactId>Scoreboards</artifactId>
+			<artifactId>Hecate</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>network.marble</groupId>
+			<artifactId>scoreboards</artifactId>
 			<version>1.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>network.marble</groupId>
+			<artifactId>ModerationBukkitSlave</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
-
-	<distributionManagement>
-		<repository>
-			<id>nexus</id>
-			<name>Releases</name>
-			<url>http://******:8081/repository/maven-releases</url>
-		</repository>
-
-		<snapshotRepository>
-			<id>nexus</id>
-			<name>Snapshot</name>
-			<url>http://******:8081/repository/maven-snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
 </project>

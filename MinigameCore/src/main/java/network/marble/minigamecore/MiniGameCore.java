@@ -1,6 +1,7 @@
 package network.marble.minigamecore;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.comphenix.protocol.ProtocolLibrary;
@@ -11,11 +12,13 @@ import network.marble.minigamecore.commands.DebugCommand;
 import network.marble.minigamecore.commands.HubCommand;
 import network.marble.minigamecore.entities.messages.CrashReportMessage;
 import network.marble.minigamecore.entities.messages.ServerAvailableMessage;
+import network.marble.minigamecore.entities.messages.ServerUnavailableMessage;
 import network.marble.minigamecore.listeners.*;
+import network.marble.minigamecore.listeners.packet.TabListMenu;
 import network.marble.minigamecore.lock.LockFile;
 import network.marble.minigamecore.managers.*;
-import network.marble.scoreboards.managers.ScoreboardManager;
-import network.marble.scoreboards.managers.SimpleScoreboardManager;
+import network.marble.scoreboards.Scoreboards;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class MiniGameCore extends JavaPlugin
@@ -31,14 +34,18 @@ public final class MiniGameCore extends JavaPlugin
 	public static TimerManager timerManager;
 	public static PartyManager partyManager;
 
+	public static ProtocolManager protocolManager;
+
 	public static Logger logger;
 	public static MiniGameCore instance;
-
+	public static final long TTLMillis = 300000;//5 minutes without players to reboot
 	@Getter
 	public static UUID instanceId;
 
 	public final static String name = "Mini-Game Core";
 	public final static String shortName = "MGC";
+	public static final boolean devNetFlagSet = System.getProperty("TESTNET") != null;
+	public UUID shutdownTaskId;
 	
 	public MiniGameCore() {
 		logger = getLogger();		
@@ -58,6 +65,8 @@ public final class MiniGameCore extends JavaPlugin
 
 		logger.info(name + " initiating");
 
+		Scoreboards.setLogger(logger);
+
 		rabbitManager = RabbitManager.getInstance();
 		gameManager = GameManager.getInstance(true);
 		worldManager = WorldManager.getInstance(true);
@@ -69,6 +78,8 @@ public final class MiniGameCore extends JavaPlugin
 		timerManager = TimerManager.getInstance();
 		partyManager = PartyManager.getInstance();
 
+		protocolManager = ProtocolLibrary.getProtocolManager();
+
 		rabbitManager.startQueueConsumer();
 		registerCommands();
 		registerEvents();
@@ -78,6 +89,9 @@ public final class MiniGameCore extends JavaPlugin
 		ServerAvailableMessage message = new ServerAvailableMessage();
 		message.serverId = instanceId;
 		message.sendToCreation();
+
+		stopShutDownTimer();
+		startShutDownTimer();
 	}
 
 	public void deinit() {
@@ -104,24 +118,44 @@ public final class MiniGameCore extends JavaPlugin
 
 	@Override
 	public void onDisable() {
+		ServerUnavailableMessage s = new ServerUnavailableMessage();
+		s.serverId = instanceId;
+		s.sendToServer();
 		deinit();
 		logger.info(name + " disabled");
+	}
+
+	public void startShutDownTimer() {
+		shutdownTaskId = TimerManager.getInstance().runIn((timer, last) -> {
+			Bukkit.getServer().shutdown();
+		}, 5, TimeUnit.MINUTES);
+	}
+
+	public void stopShutDownTimer() {
+		if (shutdownTaskId != null) TimerManager.getInstance().stopTimer(shutdownTaskId);
 	}
 
 
 	public void registerCommands() {
 		if (instance == null) return;
+		commandManager.unregisterAllCommands();
 		instance.getCommand("debug").setExecutor(new DebugCommand());
 		commandManager.registerCommand(new CoreCommand(), true);
 		commandManager.registerCommand(new HubCommand(), true);
 	}
 
 	public void registerEvents() {
-		eventManager.registerEvent(new PlayerEvents(), true);
-		eventManager.registerEvent(new GameEvents(), true);
-		eventManager.registerEvent(new MessageEvents(), true);
-		eventManager.registerEvent(new CommandEvents(), true);
-		eventManager.registerEvent(new BlockEvents(), true);
+		eventManager.registerEvents(
+				true,
+				new PlayerEvents(),
+				new GameEvents(),
+				new MessageEvents(),
+				new CommandEvents(),
+				new BlockEvents(),
+				new EntityEvents(),
+				new network.marble.scoreboards.PlayerEvents());
+
+		protocolManager.addPacketListener(new TabListMenu());
 	}
 
 	public void cleanUp() {

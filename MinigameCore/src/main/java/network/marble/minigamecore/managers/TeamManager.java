@@ -118,7 +118,7 @@ public class TeamManager {
         }
     }
 
-    public static int calculateMaximumOfPlayers(){
+    public static int calculateMaximumOfPlayers() {
         GameMode gm = GameManager.getGameMode();
         if (dynamicTeams) {
             int teamCount = gm != null ? gm.getMaxTeamCount() : Integer.MAX_VALUE;

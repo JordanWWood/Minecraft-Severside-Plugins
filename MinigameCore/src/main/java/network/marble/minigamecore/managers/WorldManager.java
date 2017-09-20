@@ -13,11 +13,14 @@ import org.bukkit.WorldCreator;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class WorldManager {
+    private final List<String> FORBIDDENNAMES = Arrays.asList(".oracle_jre_usage", "logs", "plugins", "timings", "world", "world_nether", "world_the_end");
     @Getter private static HashMap<String, World> currentWorlds;
     @Getter private static HashMap<String, WorldSettings> currentWorldsSettings;
 
@@ -30,12 +33,12 @@ public class WorldManager {
         worlds = new HashMap<>();
         currentWorlds = new HashMap<>();
         currentWorldsSettings = new HashMap<>();
-        Init();
+        init();
     }
 
-    private void Init() {
+    private void init() {
         MiniGameCore.logger.info("Loading Worlds");
-        File loc = MiniGameCore.instance.getDataFolder();
+        File loc = new File(MiniGameCore.instance.getDataFolder(),"worlds");
 
         if (!loc.exists()) loc.mkdirs();
 
@@ -48,9 +51,11 @@ public class WorldManager {
 
         for (File f : flist) {
             World world = loadWorld(f);
-            if ( world != null) {
-                worlds.put(world.getName(), world);
-                MiniGameCore.logger.info("Loaded World " + world.getName());
+            if (world != null) {
+                String worldName = world.getName();
+                if (FORBIDDENNAMES.contains(worldName)) continue;
+                worlds.put(worldName, world);
+                MiniGameCore.logger.info("Loaded World " + worldName);
             }
         }
         MiniGameCore.logger.info("Loaded Worlds");
@@ -64,7 +69,7 @@ public class WorldManager {
             MiniGameCore.logger.info("Unable to find world "+worldName);
             return false;
         }
-        installWorld(worldName, null);
+        installWorld(worldName, GameManager.getGameMode());
         MiniGameCore.logger.info("World "+worldName+" installed");
         currentWorlds.put(worldName, world);
         MiniGameCore.logger.info("World "+worldName+" set");
@@ -101,10 +106,12 @@ public class WorldManager {
             wc.seed(0);
             wc.generator(new BlankChunkGenerator());
             org.bukkit.World world = Bukkit.createWorld(wc);
-
+            world.setGameRuleValue("announceAdvancements", "false");
             MiniGameCore.logger.info("World created in server");
+
             if (GameManager.getCurrentMiniGame() != null && mode != null && currentWorld.isGameModeSupported(mode)) {
                 WorldSettings worldSettings = currentWorld.getGameModeWorldSetting(mode);
+
                 currentWorldsSettings.putIfAbsent(worldName, worldSettings);
                 world.setAutoSave(worldSettings.isAutoSave());
                 worldSettings.getGameRules().forEach(world::setGameRuleValue);
@@ -141,7 +148,7 @@ public class WorldManager {
             org.bukkit.World world = Bukkit.getWorld(currentWorld.getName());
             if (world != null) Bukkit.getServer().unloadWorld(world, false);
             File worldLocation = new File(new File(".").getAbsolutePath()+"/"+currentWorld.getName());
-            /*if (worldLocation.exists()) */FileUtils.deleteDirectory(worldLocation);
+            /*if (worldLocation.exists()) */Files.delete(worldLocation.toPath());
         } catch(IOException e) {
             MiniGameCore.logger.severe("Failed to uninstall world: "+e.getMessage());
             e.printStackTrace();
@@ -149,18 +156,21 @@ public class WorldManager {
     }
 
     private World loadWorld(File file) {
+        String worldInfoPattern = "world.info";
         String gameConfigPattern = ".gamemode.config";
         try {
             ArrayList<String> gameConfigs = new ArrayList<>();
+            String worldInfoPath = null;
             ZipFile zipFile = new ZipFile(file);
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry element = entries.nextElement();
-                if (element.getName().endsWith(gameConfigPattern)) gameConfigs.add(element.getName()); //.replace(gameConfigPattern, "")
+                if (element.getName().endsWith(gameConfigPattern)) gameConfigs.add(element.getName());
+                if (element.getName().equals(worldInfoPattern)) worldInfoPath = element.getName();
             }
             zipFile.close();
             String name = file.getName().replace(ZIPFILEPATTERN, "");
-            return new World(name, file.getAbsolutePath(), gameConfigs);
+            return new World(name, file.getAbsolutePath(), gameConfigs, worldInfoPath);
 
         } catch (Exception e) {
             MiniGameCore.logger.severe("Failed to load world: " + e.getMessage());
@@ -174,12 +184,7 @@ public class WorldManager {
     }
 
     public String getWorldList() {
-        StringBuilder list = new StringBuilder();
-        for(Map.Entry<String, World> entry : worlds.entrySet()) {
-            list.append(entry.getKey()+",");
-        }
-        list.append(" :"+worlds.size());
-        return list.toString();
+        return worlds.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.joining(", ")) + " :"+ worlds.size();
     }
 
     public List<World> getWorlds() {
@@ -192,7 +197,7 @@ public class WorldManager {
         HashMap<UUID, List<World>> gamemodes = new HashMap<>();
         getWorlds().forEach(world ->
         {
-            worlds.put(world, world.getSupportGameModeIds());
+            worlds.put(world, world.getSupportedGameModeIds());
         });
 
         worlds.forEach((world, modes) -> modes.forEach(mode -> {

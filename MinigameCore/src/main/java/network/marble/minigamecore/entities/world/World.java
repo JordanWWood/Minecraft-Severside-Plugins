@@ -13,22 +13,24 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class World {
+    @Getter WorldInfo info;
     @Getter String name;
     @Getter String zipLocation;
     @Getter List<WorldSettings> worldSettings;
 
-    public World(String name, String zipLocation, ArrayList<String> gameConfigLocations){
+    public World(String name, String zipLocation, ArrayList<String> gameConfigLocations, String worldInfoLocation){
         this.name = name;
         this.zipLocation = zipLocation;
+        this.info = this.loadWorldInfo(worldInfoLocation);
         this.worldSettings = this.loadWorldSetting(gameConfigLocations);
     }
 
-    public List<UUID> getSupportGameModeIds() {
+    public List<UUID> getSupportedGameModeIds() {
         return getWorldSettings().stream().map(WorldSettings::getGameModeId).collect(Collectors.toList());
     }
 
-    public List<GameMode> getSupportGameModes() {
-        List<UUID> ids = getSupportGameModeIds();
+    public List<GameMode> getSupportedGameModes() {
+        List<UUID> ids = getSupportedGameModeIds();
         List<GameMode> modes;
         try {
             modes = new GameMode().get(ids);
@@ -40,13 +42,20 @@ public class World {
     }
 
     public boolean isGameModeSupported(GameMode mode) {
-        long count = getWorldSettings().stream().filter(worldSetting -> worldSetting.getGameModeId() == mode.getId()).count();
+        if (mode == null) return false;
+        long count = getWorldSettings().stream().filter(worldSetting -> worldSetting.getGameModeId().equals(mode.getId())).count();
         return count > 0;
     }
 
     public WorldSettings getGameModeWorldSetting(GameMode mode) {
-        Optional<WorldSettings> result = getWorldSettings().stream().filter(worldSetting -> worldSetting.getGameModeId() == mode.getId()).findFirst();
-        return result.isPresent() ? result.get() : null;
+        return getWorldSettings().stream().filter(worldSetting -> worldSetting.getGameModeId().equals(mode.getId())).findFirst().orElse(null);
+    }
+
+    private WorldInfo loadWorldInfo(String worldInfoLocation) {
+        Gson g = new Gson();
+        String file = loadFile(worldInfoLocation);
+        if (file != null) return g.fromJson(file, WorldInfo.class);
+        else return new WorldInfo();
     }
 
     private List<WorldSettings> loadWorldSetting(List<String> gameConfigLocations) {

@@ -14,8 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class MinigameCommand extends BukkitCommand {
-	public List<PlayerType> CANBERUNBY = new ArrayList<>();
-	public List<String> COMMANDALIASES = new ArrayList<>();
+	public List<PlayerType> canBeRunBy = new ArrayList<>();
+	public List<String> commandAliases = new ArrayList<>();
 
 	/***
 	 * Construct a new command.
@@ -23,7 +23,7 @@ public abstract class MinigameCommand extends BukkitCommand {
 	 */
 	public MinigameCommand(String name){
 		super(name);
-		COMMANDALIASES = Arrays.asList(name);
+		commandAliases = Arrays.asList(name);
 	}
 
 	/**
@@ -38,11 +38,11 @@ public abstract class MinigameCommand extends BukkitCommand {
 		}
 		if (sender instanceof Player) {
 			MiniGamePlayer mp = PlayerManager.getPlayer(((Player) sender));
-			if (mp == null || mp.playerType == null) sender.sendMessage("Well done, you're a null id.");
-			else if (CANBERUNBY.contains(mp.playerType)) return commandExecution(sender, label, args);
-			else sender.sendMessage("Sorry but you do not have access to this command.");
+			if (mp == null || mp.playerType == null) sender.sendMessage("Something has gone wrong, if this keeps happening please contact a member of staff");
+			else if (canBeRunBy.contains(mp.playerType)) return commandExecution(sender, label, args);
+			else sender.sendMessage("Unknown command!");
 		} else if(CommandManager.restrictionOverride) return commandExecution(sender, label, args);
-		else sender.sendMessage("This command is a id command, stop it.");
+		else sender.sendMessage("Unknown command!");
 		return false;
 	}
 	
@@ -58,7 +58,7 @@ public abstract class MinigameCommand extends BukkitCommand {
 	@Override
 	@Deprecated
 	public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
-		return COMMANDALIASES.contains(alias) ? tabCompletion(sender, alias, args): super.tabComplete(sender, alias, args);
+		return commandAliases.contains(alias) ? tabCompletion(sender, alias, args): super.tabComplete(sender, alias, args);
 	}
 
 	public List<String> tabCompletion(CommandSender sender, String alias, String[] args) {

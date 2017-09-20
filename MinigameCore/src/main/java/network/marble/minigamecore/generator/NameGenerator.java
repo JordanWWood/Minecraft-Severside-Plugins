@@ -1,17 +1,14 @@
 package network.marble.minigamecore.generator;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by Duncan on 10/08/2016.
- */
 public class NameGenerator {
 
+	//TODO revamp with own internal generator
     public static String getRandomName(){
         String name;
         String backUpName = "SMASHPANDA";

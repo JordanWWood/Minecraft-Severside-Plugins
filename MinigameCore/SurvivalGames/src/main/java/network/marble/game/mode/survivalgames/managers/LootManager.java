@@ -1,26 +1,33 @@
 package network.marble.game.mode.survivalgames.managers;
 
-import network.marble.game.mode.survivalgames.config.MapConfig;
-import network.marble.game.mode.survivalgames.config.Model.Locations;
-import network.marble.game.mode.survivalgames.config.Model.TierItem;
-import network.marble.game.mode.survivalgames.listeners.StateListener;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Chest;
-import org.bukkit.inventory.ItemStack;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Chest;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import network.marble.game.mode.survivalgames.config.MapConfig;
+import network.marble.game.mode.survivalgames.config.Model.Locations;
+import network.marble.game.mode.survivalgames.config.Model.TierItem;
+import network.marble.game.mode.survivalgames.listeners.StateListener;
+import network.marble.minigamecore.managers.AnalyticsManager;
+import network.marble.minigamecore.managers.PlayerManager;
 
 public class LootManager {
     private static MapConfig mapConfig = StateListener.getMapConfig();
     private static Map<Location, Boolean> openedChests = new HashMap<>();
+    private static Map<Player, Map<Location, Boolean>> playerOpenedChests = new HashMap<>();
 
-    public static void rollLoot(Locations location, int minItems, int maxItems, boolean largeChest, World world) {
+    public static void rollLoot(Locations location, int minItems, int maxItems, boolean largeChest, Player p) {
+    	World world = p.getWorld();
         int tier = location.getTier();
         List<TierItem> loot = mapConfig.getChests().getTiers().get(tier);
         int numberOfItems = random(minItems, (largeChest ? maxItems * 2 : maxItems), null);
@@ -44,7 +51,14 @@ public class LootManager {
             chest.getInventory().setItem(slot, itemStack);
         }
 
+        if(!playerOpenedChests.containsKey(p)) playerOpenedChests.put(p, new HashMap<>());
         openedChests.put(chest.getLocation(), true);
+        if(!playerOpenedChests.get(p).containsKey(chest.getLocation())){
+        	UUID pDBID = PlayerManager.getPlayer(p).getUserId();
+            AnalyticsManager.getInstance().alterGameModeAnalyticsValue(pDBID, StateListener.getMapConfig().getInfo().getName() + "chestsopened", 1);
+    		AnalyticsManager.getInstance().alterGameModeAnalyticsValue(pDBID, "chestsopened", 1);
+    		playerOpenedChests.get(p).put(chest.getLocation(), true);
+        }
     }
 
     private static int random(int min, int max, List<Integer> excludedNumbers) {//TODO reannotate nullable on list
@@ -63,5 +77,6 @@ public class LootManager {
 
     public static void refillChests() {
         openedChests.clear();
+        playerOpenedChests.clear();
     }
 }

@@ -5,15 +5,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -43,13 +40,6 @@ public class LobbyListener implements Listener {
 	public void onPlayerQuit(PlayerQuitEvent e) {
 		timerCheck();
 	}
-	
-	@EventHandler
-    public void onMobSpawn(PlayerInteractEvent e) {
-		if(e.getAction() == Action.PHYSICAL && e.getClickedBlock() != null && e.getClickedBlock().getType() == Material.SOIL){
-			e.setCancelled(true);
-		}
-    }
 	
 	private void timerCheck(){
 		if(PlayerManager.getPlayers(PlayerType.PLAYER).size() > 5 && !timerGoing){

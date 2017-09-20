@@ -2,7 +2,6 @@ package network.marble.minigamecore.entities.timer;
 
 import java.util.UUID;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class Timer {
     public final UUID id;

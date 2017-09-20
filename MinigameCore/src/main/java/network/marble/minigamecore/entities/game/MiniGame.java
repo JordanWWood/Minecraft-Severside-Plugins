@@ -3,9 +3,9 @@ package network.marble.minigamecore.entities.game;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import network.marble.minigamecore.entities.command.MinigameCommand;
-import network.marble.minigamecore.entities.team.TeamSetup;
 import org.bukkit.event.Listener;
+
+import network.marble.minigamecore.entities.team.TeamSetup;
 
 public interface MiniGame {
 
