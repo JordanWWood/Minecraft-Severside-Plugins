@@ -9,7 +9,8 @@ website: http://marble.network
 commands:
   punishment:
     aliases: [p, punish]
-  kick:
+  mute:
+    aliases: [m]
 
 permissions:
   moderation.commands.punishment:
