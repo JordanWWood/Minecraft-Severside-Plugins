@@ -1,21 +1,19 @@
 package network.marble.vanity.api.type;
 
-import network.marble.vanity.Vanity;
-import network.marble.vanity.api.Slot;
-import network.marble.vanity.api.base.VanityPlugin;
-import network.marble.vanity.api.type.base.VanityItemBase;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.scheduler.BukkitTask;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
+
+import network.marble.vanity.Vanity;
+import network.marble.vanity.api.Slot;
+import network.marble.vanity.api.type.base.VanityItemBase;
+
 public abstract class CyclingVanityItem extends VanityItemBase {
-    private int task;
-    private Slot slot;
+	private BukkitTask task;
 
     protected int interval;
 
@@ -29,30 +27,29 @@ public abstract class CyclingVanityItem extends VanityItemBase {
      * @param p
      * @param slot
      */
-    public CyclingVanityItem(int interval, Player p, Slot slot) {
+    public CyclingVanityItem(Player pl, int interval, Slot slot, String name) {
+    	super(slot, materials.get(0), name);
         this.interval = interval;
-        this.p = p;
-        this.slot = slot;
     }
 
-    @Override
-    public void invoke(VanityPlugin pl) {
-        task = Bukkit.getScheduler().scheduleSyncRepeatingTask(Vanity.getInstance(), this::run, 0L, interval);
-
-        super.invoke(pl);
+    public void equip(Player player) {
+        task = Bukkit.getScheduler().runTaskTimer(Vanity.getInstance(), () -> this.run(player), 0L, interval);
+        super.equip(player);
     }
 
     private int index = 0;
+    
     @Override
-    protected void run() {
+    protected void run(Player player) {
         if (index >= materials.size()) index = 0;
         nextItem = materials.get(index);
 
-        super.run();
+        super.run(player);
         index++;
     }
 
-    public void cancel() {
-        Bukkit.getScheduler().cancelTask(task);
+    public void unEquip(Player player) {
+        task.cancel();
+        super.unEquip(player);
     }
 }

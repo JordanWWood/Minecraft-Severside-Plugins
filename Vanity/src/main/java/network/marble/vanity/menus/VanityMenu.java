@@ -1,20 +1,15 @@
 package network.marble.vanity.menus;
 
-import network.marble.dataaccesslayer.models.plugins.vanity.VanityItem;
+import java.util.List;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+
 import network.marble.inventoryapi.inventories.Menu;
 import network.marble.inventoryapi.itemstacks.ActionItemStack;
 import network.marble.inventoryapi.itemstacks.InventoryItem;
-import network.marble.vanity.Vanity;
-import network.marble.vanity.api.base.VanityPlugin;
-import network.marble.vanity.managers.VanityPluginManager;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitScheduler;
-
-import java.util.List;
 
 public class VanityMenu extends Menu {
     private final int INVENTORY_SIZE = 54;
@@ -24,19 +19,16 @@ public class VanityMenu extends Menu {
 
     Player player;
 
-    public VanityMenu(Player targetPlayer, InventoryItem inventoryItem, int inventorySize, List<InventoryItem> vanityItems) {
+    public VanityMenu(Player targetPlayer, InventoryItem inventoryItem, int inventorySize, List<InventoryItem> vanityItems, String category) {
         super(targetPlayer, inventoryItem, inventorySize);
 
         player = targetPlayer;
-        Vanity.getInstance().getLogger().info(vanityItems.size() + "");
         for (int i = 0; i < vanityItems.size(); i++) {
-            Vanity.getInstance().getLogger().info("Added: " + vanityItems.get(i).getItemStack(targetPlayer).getType());
             itemStacks[i] = vanityItems.get(i).getItemStack(targetPlayer);
             inventoryItems[i] = vanityItems.get(i);
         }
 
-        Inventory inv = Bukkit.createInventory(targetPlayer, 54, "Category");
-        Vanity.getInstance().getLogger().info(inv.getName() + "|" + inv.getTitle());
+        Inventory inv = Bukkit.createInventory(targetPlayer, 54, category);
         inv.setContents(itemStacks);
 
         targetPlayer.openInventory(inv);
@@ -44,11 +36,13 @@ public class VanityMenu extends Menu {
 
     @Override
     public boolean execute(int slot, int rawSlot) {
-        if (inventoryItems[rawSlot] != null) {
-            ((ActionItemStack)inventoryItems[rawSlot]).getExecutor().executeAction(player, inventoryItems[rawSlot], null);
+        if(slot == rawSlot){//Validate the click is in the top of the inventory
+            if (inventoryItems[rawSlot] != null) {
+                ((ActionItemStack)inventoryItems[rawSlot]).getExecutor().executeAction(player, inventoryItems[rawSlot], null);
+            }
+            return false;
+        }else{
             return true;
         }
-
-        return false;
     }
 }

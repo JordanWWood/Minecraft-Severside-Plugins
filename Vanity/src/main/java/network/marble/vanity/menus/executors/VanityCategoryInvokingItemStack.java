@@ -1,18 +1,15 @@
 package network.marble.vanity.menus.executors;
 
-import network.marble.dataaccesslayer.models.plugins.vanity.VanityItem;
-import network.marble.inventoryapi.api.InventoryAPI;
-import network.marble.inventoryapi.interfaces.ActionExecutor;
-import network.marble.inventoryapi.itemstacks.InventoryItem;
-import network.marble.vanity.Vanity;
-import network.marble.vanity.api.base.VanityPlugin;
-import network.marble.vanity.menus.MenuItems;
-import network.marble.vanity.menus.VanityMenu;
-import org.bukkit.Material;
+import java.util.List;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 
-import java.util.List;
+import network.marble.inventoryapi.api.InventoryAPI;
+import network.marble.inventoryapi.interfaces.ActionExecutor;
+import network.marble.inventoryapi.itemstacks.InventoryItem;
+import network.marble.vanity.menus.MenuItems;
+import network.marble.vanity.menus.VanityMenu;
 
 public class VanityCategoryInvokingItemStack implements ActionExecutor {
     @Override
@@ -22,11 +19,6 @@ public class VanityCategoryInvokingItemStack implements ActionExecutor {
             player.sendMessage("No vanity items could be found for this category");
             return;
         }
-
-        for (InventoryItem item : items) {
-            Vanity.getInstance().getLogger().info(item.toString());
-        }
-
-        InventoryAPI.openMenuForPlayer(player.getUniqueId(), new VanityMenu(player, inventoryItem, InventoryType.CHEST.getDefaultSize() * 2, items));
+        InventoryAPI.openMenuForPlayer(player.getUniqueId(), new VanityMenu(player, inventoryItem, InventoryType.CHEST.getDefaultSize() * 2, items, strings[0]));
     }
 }

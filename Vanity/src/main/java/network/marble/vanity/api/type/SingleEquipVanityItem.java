@@ -1,10 +1,10 @@
 package network.marble.vanity.api.type;
 
-import network.marble.vanity.api.Slot;
-import network.marble.vanity.api.base.VanityPlugin;
-import network.marble.vanity.api.type.base.VanityItemBase;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import network.marble.vanity.api.Slot;
+import network.marble.vanity.api.type.base.VanityItemBase;
 
 public abstract class SingleEquipVanityItem extends VanityItemBase {
     /**
@@ -12,26 +12,25 @@ public abstract class SingleEquipVanityItem extends VanityItemBase {
      *
      * @param player
      */
-    public SingleEquipVanityItem(Player player, ItemStack item) {
-        this.p = player;
-        this.nextItem = item;
+    public SingleEquipVanityItem(ItemStack item, Slot s, String name) {
+    	super(s, item, name);
+    }
+
+    public void equip(Player p) {
+        run(p);
+        super.equip(p);
     }
 
     @Override
-    public void invoke(VanityPlugin pl) {
-        run();
-
-        super.invoke(pl);
-    }
-
-    @Override
-    protected void run() {
-        super.run();
+    protected void run(Player p) {
+        super.run(p);
     }
 
     /**
      * method is invoked when a player disconnects or equips a new item in the slot this is equipped in
      */
     @Override
-    public abstract void cancel();
+    public void unEquip(Player p) {
+        super.unEquip(p);
+    }
 }

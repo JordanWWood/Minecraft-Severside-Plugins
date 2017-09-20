@@ -1,26 +1,29 @@
 package network.marble.vanity.menus.getters;
 
-import network.marble.inventoryapi.api.InventoryAPI;
+import java.util.ArrayList;
+import java.util.UUID;
+
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import network.marble.currencyapi.api.CurrencyAPI;
+import network.marble.currencyapi.api.KnownCurrency;
+import network.marble.dataaccesslayer.exceptions.APIException;
+import network.marble.dataaccesslayer.models.plugins.vanity.VanityItem;
+import network.marble.dataaccesslayer.models.user.User;
 import network.marble.inventoryapi.interfaces.ItemStackGetter;
 import network.marble.inventoryapi.itemstacks.ActionItemStack;
 import network.marble.inventoryapi.itemstacks.InventoryItem;
 import network.marble.vanity.Vanity;
-import network.marble.vanity.api.base.VanityPlugin;
-import network.marble.vanity.menus.MenuItems;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
+import network.marble.vanity.api.type.base.VanityItemBase;
 
 public class VanityIconGetter implements ItemStackGetter {
     private ItemStack itemStack;
-    private Long price;
 
-    public VanityIconGetter(ItemStack is, Long price) {
+    public VanityIconGetter(ItemStack is) {
         this.itemStack = is;
-        this.price = price;
     }
 
     @Override
@@ -28,12 +31,39 @@ public class VanityIconGetter implements ItemStackGetter {
         ActionItemStack aic = (ActionItemStack) inventoryItem;
         String name = aic.getExecutorArgs()[0];
 
-        VanityPlugin pl = Vanity.getVanityPluginManager().getPlugins().get(name);
+        VanityItemBase pl = Vanity.getVanityPluginManager().getPlugins().get(name);
 
         //TODO Check ownership
-        ArrayList<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GREEN + "Owned");
+        User u = null;
+        VanityItem vi = null;
+        try {
+            u = new User().getByUUID(player.getUniqueId());
+            vi = new VanityItem().getByName(pl.getName());
+        } catch (APIException e) {
+            e.printStackTrace();
+        }
+        ArrayList<String> lore;
+        if(itemStack.getItemMeta().getLore() == null) {
+            lore = new ArrayList<>();	
+        } else {
+            lore = (ArrayList<String>) itemStack.getItemMeta().getLore();
+        }
+        if (u.getVanityitems().containsKey(vi.getId())) {
+            lore.add(ChatColor.GREEN + "Click to Equip");
+        } else {
+            UUID id = CurrencyAPI.getCurrency(KnownCurrency.CHIPS.getName());
+            Long balance = CurrencyAPI.getPlayerBalance(player.getUniqueId(), id);
 
-        return InventoryAPI.createItemStack(itemStack.getType(), itemStack.getAmount(), itemStack.getDurability(), ChatColor.GOLD + pl.getName(), lore, true);
+            if (balance >= vi.getPrice()) {
+                lore.add(ChatColor.GREEN + "Click to buy for " + vi.getPrice() + " Chips");
+            } else {
+                lore.add(ChatColor.RED + "You require " + vi.getPrice() + " Chips to buy this");
+            }
+        }
+        ItemStack is = itemStack.clone();
+        ItemMeta meta = is.getItemMeta();
+        meta.setLore(lore);
+        is.setItemMeta(meta);
+        return is;
     }
 }
