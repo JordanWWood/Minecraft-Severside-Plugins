@@ -1,10 +1,10 @@
 package network.marble.inventoryapi.enums;
 
 public enum ArmorType {
-	HELMET(0),
-	CHEST(1),
-	LEGS(2),
-	BOOTS(3);
+	HELMET(3),
+	CHEST(2),
+	LEGS(1),
+	BOOTS(0);
 	
 	private final int id;
 	ArmorType(int id) {

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -247,19 +248,9 @@ public class InventoryAPI {
 				}
 			}
 			
-			//Generate armour
-			ItemStack[] armourItems = InventoryAPIPlugin.globalArmour.getItemStacks();
-			if(InventoryAPIPlugin.playerArmour.containsKey(player.getUniqueId())){
-				ItemStack[] playerArmour = InventoryAPIPlugin.playerArmour.get(player.getUniqueId()).getItemStacks();
-				for(int i = 0; i < playerArmour.length; i++){
-					if(playerArmour[i]!=null){
-						armourItems[i] = playerArmour[i];
-					}
-				}
-			}
-			
-			player.getInventory().setArmorContents(armourItems);
 			player.getInventory().setContents(realItemStacks);
+			refreshPlayerArmour(player);
+			
 			refreshPlayerOffHandItem(player);
 			player.updateInventory();
 			
