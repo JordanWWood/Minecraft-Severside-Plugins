@@ -1,0 +1,12 @@
+name: QuickQueue
+version: ${project.version}
+authors: [Marble Network]
+load: POSTWORLD
+prefix: QQ
+main: network.marble.quickqueue.QuickQueue
+
+depend: [InventoryAPI, DataAccessLayer, MessageAPI, Hecate, BadgeAPI]
+
+commands:
+  party:
+    aliases: [p]
