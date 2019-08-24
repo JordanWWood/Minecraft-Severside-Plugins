@@ -24,7 +24,7 @@ public class Message {
     }
 
     public <T extends Message> void respondTo() {
-    	RabbitManager.getInstance().respondToMessage(this);
+        RabbitManager.getInstance().respondToMessage(this);
     }
     
     public <T extends Message> void respondTo(T message) {

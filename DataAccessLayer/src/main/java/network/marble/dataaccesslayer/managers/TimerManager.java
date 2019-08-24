@@ -3,27 +3,35 @@ package network.marble.dataaccesslayer.managers;
 import network.marble.dataaccesslayer.base.DataAccessLayer;
 import network.marble.dataaccesslayer.entities.timer.Timer;
 import network.marble.dataaccesslayer.entities.timer.TimerType;
+import network.marble.dataaccesslayer.interfaces.ITimerManager;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
-public class TimerManager {
-    private static TimerManager instance;
+public class TimerManager implements ITimerManager {
+    protected static TimerManager instance;
 
     private static Thread mainCounter = null;
     private static ConcurrentHashMap<UUID, Timer> timers = new ConcurrentHashMap<>();
 
-    public TimerManager() {
+    private ExecutorService executorService = Executors.newFixedThreadPool(6);
+
+    private boolean run = false;
+
+    private TimerManager() {
         startMainThread();
     }
 
     private void startMainThread() {
+        run = true;
         if (mainCounter == null) mainCounter = new Thread(() -> {
-            for(;;) {
+            while(run) {
                 Long currentTime = System.currentTimeMillis();
                 List<UUID> toRemove = new ArrayList<>();
                 timers.forEach((id, timer) -> {
@@ -49,14 +57,14 @@ public class TimerManager {
                                 last = false;
                                 break;
                         }
-                        new Thread(() -> {
+                        executorService.submit(() -> {
                             try {
                                 timer.task.accept(timer, last);
                             } catch(Exception e) {
                                 DataAccessLayer.instance.logger.severe("Exception in timer task");
                                 e.printStackTrace();
                             }
-                        }).start();
+                        });
                     }
                 });
                 toRemove.forEach(timers::remove);
@@ -70,18 +78,22 @@ public class TimerManager {
         mainCounter.start();
     }
 
+    @Override
     public UUID runEveryUntil(BiConsumer<Timer, Boolean> task, long every, TimeUnit everyUnit, long until, TimeUnit untilUnit) {
         return runEveryUntil(task, everyUnit.toMillis(every), untilUnit.toMillis(until));
     }
 
+    @Override
     public UUID runEveryUntil(BiConsumer<Timer, Boolean> task, long every, long until, TimeUnit untilUnit) {
         return runEveryUntil(task, every, untilUnit.toMillis(until));
     }
 
+    @Override
     public UUID runEveryUntil(BiConsumer<Timer, Boolean> task, long every, TimeUnit everyUnit, long until) {
         return runEveryUntil(task, everyUnit.toMillis(every), until);
     }
 
+    @Override
     public UUID runEveryUntil(BiConsumer<Timer, Boolean> task, long every, long until) {
         Timer timer = new Timer(TimerType.FINITE, task);
         long current = System.currentTimeMillis();
@@ -92,10 +104,12 @@ public class TimerManager {
         return  timer.id;
     }
 
+    @Override
     public UUID runEvery(BiConsumer<Timer, Boolean> task, long every, TimeUnit unit) {
         return runEvery(task, unit.toMillis(every));
     }
 
+    @Override
     public UUID runEvery(BiConsumer<Timer, Boolean> task, long every) {
         Timer timer = new Timer(TimerType.INFINITE, task);
         timer.executeAt = System.currentTimeMillis() + every;
@@ -104,10 +118,12 @@ public class TimerManager {
         return  timer.id;
     }
 
+    @Override
     public UUID runIn(BiConsumer<Timer, Boolean> task, long delay, TimeUnit unit) {
         return runIn(task, unit.toMillis(delay));
     }
 
+    @Override
     public UUID runIn(BiConsumer<Timer, Boolean> task, long delay) {
         Timer timer = new Timer(TimerType.SINGLE, task);
         timer.executeAt = System.currentTimeMillis() + delay + 1;
@@ -115,10 +131,14 @@ public class TimerManager {
         return  timer.id;
     }
 
-    public void stopTimer(UUID id) {
-        if (id != null && timers.containsKey(id)) timers.remove(id);
+    @Override
+    public boolean stopTimer(UUID id) {
+        if (id == null || !timers.containsKey(id)) return false;
+        timers.remove(id);
+        return true;
     }
 
+    @Override
     public boolean updateTimerTask(UUID id, BiConsumer<Timer, Boolean> task) {
         if (timers.containsKey(id)) {
             Timer t = timers.remove(id);
@@ -132,6 +152,7 @@ public class TimerManager {
     /**
      * Warning: this will reset next execution time
      */
+    @Override
     public boolean updateTimerEvery(UUID id, long every, TimeUnit unit) {
         return updateTimerEvery(id, unit.toMillis(every));
     }
@@ -139,6 +160,7 @@ public class TimerManager {
     /**
      * Warning: this will reset next execution time
      */
+    @Override
     public boolean updateTimerEvery(UUID id, long every) {
         if (timers.containsKey(id)) {
             Timer t = timers.remove(id);
@@ -153,8 +175,12 @@ public class TimerManager {
         return false;
     }
 
+    @Override
     public void cleanUp() {
         timers.clear();
+        run = false;
+        mainCounter.stop();
+        mainCounter = null;
     }
 
     public static TimerManager getInstance() {

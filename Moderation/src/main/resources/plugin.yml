@@ -1,5 +1,5 @@
 name: Moderation
 main: network.marble.moderation.Moderation
-version: 1.0
+version: ${project.version}
 author: Marble Network
 depends: [DataAccessLayer]

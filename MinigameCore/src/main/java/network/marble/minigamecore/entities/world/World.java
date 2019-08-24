@@ -21,7 +21,7 @@ public class World {
     public World(String name, String zipLocation, ArrayList<String> gameConfigLocations, String worldInfoLocation){
         this.name = name;
         this.zipLocation = zipLocation;
-        this.info = this.loadWorldInfo(worldInfoLocation);
+        this.info = (worldInfoLocation != null ? this.loadWorldInfo(worldInfoLocation) : new WorldInfo()); //null locations are acceptable for live-generated worlds
         this.worldSettings = this.loadWorldSetting(gameConfigLocations);
     }
 

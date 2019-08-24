@@ -3,7 +3,7 @@ package network.marble.minigamecore.entities.messages;
 import java.util.UUID;
 
 public class PlayerExpectationCancelledMessage extends Message {
-	public UUID playerId;
+    public UUID playerId;
     public boolean isPlayerMode;
 
     public PlayerExpectationCancelledMessage(UUID playerId, boolean isPlayerMode) {

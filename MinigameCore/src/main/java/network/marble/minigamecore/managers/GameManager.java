@@ -9,12 +9,14 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
+import network.marble.minigamecore.entities.analytics.game.state.ServerStateChangeEvent;
+import network.marble.minigamecore.entities.analytics.server.MiniGameSetEvent;
+import network.marble.minigamecore.entities.analytics.server.MiniGameUnsetEvent;
 import org.bukkit.Bukkit;
 
 import lombok.Getter;
@@ -48,6 +50,7 @@ public class GameManager {
 		GameStatus oldStatus = GameManager.status;
 		GameManager.status = status;
 		Bukkit.getServer().getPluginManager().callEvent(new GameStatusChangeEvent(oldStatus, status));
+		AnalyticsManager.getInstance().submitAnalyticEvent(new ServerStateChangeEvent(oldStatus, status));
 		MiniGameCore.logger.info("STATE CHANGED, MESSAGING ATLAS");
 		
     	GameStatusUpdateMessage message = new GameStatusUpdateMessage();
@@ -79,6 +82,8 @@ public class GameManager {
 		}
 		GameManager.gameId = gameMode.game_id;
 		GameManager.gameMode = gameMode;
+		AnalyticsManager.getInstance().submitServerEvent(new MiniGameSetEvent(gameMode.getGame_id(), gameMode.getId()));
+
 		MiniGame miniGame = getMiniGameByUUID(gameMode.game_id);
 		if (miniGame == null) {
 			MiniGameCore.logger.info("Unable to find mini-game for game"+gameMode.game_id.toString());
@@ -99,6 +104,7 @@ public class GameManager {
 
 	public boolean unsetCurrentGame() {
 		if (currentMiniGame != null){
+			AnalyticsManager.getInstance().submitServerEvent(new MiniGameUnsetEvent());
 			Bukkit.getServer().getPluginManager().callEvent(new GameAbortedEvent());
 			uninstallMiniGame();
 			currentMiniGame = null;

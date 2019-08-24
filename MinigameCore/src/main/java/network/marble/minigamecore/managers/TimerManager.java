@@ -1,160 +1,86 @@
 package network.marble.minigamecore.managers;
 
-import java.util.ArrayList;
-import java.util.List;
+import network.marble.dataaccesslayer.entities.timer.Timer;
+import network.marble.dataaccesslayer.interfaces.ITimerManager;
+
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
-import network.marble.minigamecore.MiniGameCore;
-import network.marble.minigamecore.entities.timer.Timer;
-import network.marble.minigamecore.entities.timer.TimerType;
+/***
+ * @deprecated Please use (@link network.marble.dataaccesslayer.managers.TimerManager)
+ */
+@Deprecated
+public class TimerManager implements ITimerManager {
+    protected static TimerManager instance;
 
-public class TimerManager {
-    private static TimerManager instance;
-
-    private static Thread mainCounter = null;
-    private static ConcurrentHashMap<UUID, Timer> timers = new ConcurrentHashMap<>();
-
-    public TimerManager() {
-        startMainThread();
+    private network.marble.dataaccesslayer.managers.TimerManager i() {
+        return network.marble.dataaccesslayer.managers.TimerManager.getInstance();
     }
 
-    private void startMainThread() {
-        if (mainCounter == null) mainCounter = new Thread(() -> {
-            for(;;) {
-                Long currentTime = System.currentTimeMillis();
-                List<UUID> toRemove = new ArrayList<>();
-                timers.forEach((id, timer) -> {
-                    if (timer.executeAt <= currentTime) {
-                        final boolean last;
-                        switch (timer.type) {
-                            case SINGLE:
-                                last = true;
-                                toRemove.add(id);
-                                break;
-                            case FINITE:
-                                timer.executeAt = currentTime + timer.executeEvery;
-                                if (currentTime >= timer.executeUntil || timer.executeAt >= timer.executeUntil) {
-                                    last = true;
-                                    toRemove.add(id);
-                                } else last = false;
-                                break;
-                            case INFINITE:
-                                timer.executeAt = currentTime + timer.executeEvery;
-                                last = false;
-                                break;
-                            default:
-                                last = false;
-                                break;
-                        }
-                        new Thread(() -> {
-                            try {
-                                timer.task.accept(timer, last);
-                            } catch(Exception e) {
-                                MiniGameCore.logger.severe("Exception in timer task");
-                                e.printStackTrace();
-                            }
-                        }).start();
-                    }
-                });
-                toRemove.forEach(timers::remove);
-                try {
-                    Thread.sleep(25L);
-                } catch (InterruptedException e) {
-                    MiniGameCore.logger.info("InterruptedException");
-                }
-            }
-        });
-        mainCounter.start();
-    }
-
+    @Override
     public UUID runEveryUntil(BiConsumer<Timer, Boolean> task, long every, TimeUnit everyUnit, long until, TimeUnit untilUnit) {
-        return runEveryUntil(task, everyUnit.toMillis(every), untilUnit.toMillis(until));
+        return i().runEveryUntil(task, every, everyUnit, until, untilUnit);
     }
 
+    @Override
     public UUID runEveryUntil(BiConsumer<Timer, Boolean> task, long every, long until, TimeUnit untilUnit) {
-        return runEveryUntil(task, every, untilUnit.toMillis(until));
+        return i().runEveryUntil(task, every, until, untilUnit);
     }
 
+    @Override
     public UUID runEveryUntil(BiConsumer<Timer, Boolean> task, long every, TimeUnit everyUnit, long until) {
-        return runEveryUntil(task, everyUnit.toMillis(every), until);
+        return i().runEveryUntil(task, every, everyUnit, until);
     }
 
+    @Override
     public UUID runEveryUntil(BiConsumer<Timer, Boolean> task, long every, long until) {
-        Timer timer = new Timer(TimerType.FINITE, task);
-        long current = System.currentTimeMillis();
-        timer.executeAt = current + every;
-        timer.executeEvery = every;
-        timer.executeUntil = current + until + 1;
-        timers.put(timer.id, timer);
-        return  timer.id;
+        return i().runEveryUntil(task, every, until);
     }
 
+    @Override
     public UUID runEvery(BiConsumer<Timer, Boolean> task, long every, TimeUnit unit) {
-        return runEvery(task, unit.toMillis(every));
+        return i().runEvery(task, every, unit);
     }
 
+    @Override
     public UUID runEvery(BiConsumer<Timer, Boolean> task, long every) {
-        Timer timer = new Timer(TimerType.INFINITE, task);
-        timer.executeAt = System.currentTimeMillis() + every;
-        timer.executeEvery = every;
-        timers.put(timer.id, timer);
-        return  timer.id;
+        return i().runEvery(task, every);
     }
 
+    @Override
     public UUID runIn(BiConsumer<Timer, Boolean> task, long delay, TimeUnit unit) {
-        return runIn(task, unit.toMillis(delay));
+        return i().runIn(task, delay, unit);
     }
 
+    @Override
     public UUID runIn(BiConsumer<Timer, Boolean> task, long delay) {
-        Timer timer = new Timer(TimerType.SINGLE, task);
-        timer.executeAt = System.currentTimeMillis() + delay + 1;
-        timers.put(timer.id, timer);
-        return  timer.id;
+        return i().runIn(task, delay);
     }
 
-    public void stopTimer(UUID id) {
-        if (id != null && timers.containsKey(id)) timers.remove(id);
+    @Override
+    public boolean stopTimer(UUID id) {
+        return i().stopTimer(id);
     }
 
+    @Override
     public boolean updateTimerTask(UUID id, BiConsumer<Timer, Boolean> task) {
-        if (timers.containsKey(id)) {
-            Timer t = timers.remove(id);
-            t.task = task;
-            timers.put(id, t);
-            return true;
-        }
-        return false;
+        return i().updateTimerTask(id, task);
     }
 
-    /**
-     * Warning: this will reset next execution time
-     */
+    @Override
     public boolean updateTimerEvery(UUID id, long every, TimeUnit unit) {
-        return updateTimerEvery(id, unit.toMillis(every));
+        return i().updateTimerEvery(id, every, unit);
     }
 
-    /**
-     * Warning: this will reset next execution time
-     */
+    @Override
     public boolean updateTimerEvery(UUID id, long every) {
-        if (timers.containsKey(id)) {
-            Timer t = timers.remove(id);
-            boolean check = t.type != TimerType.SINGLE;
-            if (check) {
-                t.executeEvery = every;
-                t.executeAt = System.currentTimeMillis() + every;
-            }
-            timers.put(id, t);
-            return check;
-        }
-        return false;
+        return i().updateTimerEvery(id, every);
     }
 
+    @Override
     public void cleanUp() {
-        timers.clear();
+        i().cleanUp();
     }
 
     public static TimerManager getInstance() {

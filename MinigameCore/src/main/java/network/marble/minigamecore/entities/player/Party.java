@@ -5,6 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class Party {
-    public List<UUID> players = new ArrayList<UUID>();
+    public List<UUID> players = new ArrayList<>();
     public UUID leader;
 }

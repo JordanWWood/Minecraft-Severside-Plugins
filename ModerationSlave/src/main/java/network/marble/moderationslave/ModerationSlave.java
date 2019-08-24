@@ -1,22 +1,26 @@
 package network.marble.moderationslave;
 
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import network.marble.hecate.Hecate;
+import network.marble.moderationslave.commands.Teleport;
+import network.marble.moderationslave.communication.RabbitManager;
+import network.marble.moderationslave.managers.CustomPayloadManager;
+import org.bukkit.plugin.java.JavaPlugin;
+
 import lombok.Getter;
-import network.marble.dataaccesslayer.exceptions.APIException;
-import network.marble.dataaccesslayer.models.plugins.moderation.ChatFilterExpression;
-import network.marble.moderationslave.commands.cmdMute;
-import network.marble.moderationslave.commands.cmdPunishment;
+import network.marble.moderationslave.commands.Mute;
+import network.marble.moderationslave.commands.PunishmentCommand;
 import network.marble.moderationslave.listeners.PlayerListener;
 import network.marble.moderationslave.utils.Schematic;
 import network.marble.moderationslave.utils.SchematicLoader;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ModerationSlave extends JavaPlugin {
     @Getter private static ModerationSlave instance;
     @Getter private static Schematic schematic;
+    @Getter private static CustomPayloadManager customPayloadManager;
 
     @Override
     public void onEnable() {
@@ -24,28 +28,22 @@ public class ModerationSlave extends JavaPlugin {
 
         try {
             exportResource("/court.schematic");
+            schematic = SchematicLoader.loadSchematic("plugins/ModerationSlave/court.schematic");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        try {
-            schematic = SchematicLoader.loadSchematic("plugins/ModerationSlave/court.schematic");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        getCommand("punishment").setExecutor(new cmdPunishment());
-        getCommand("mute").setExecutor(new cmdMute());
+        customPayloadManager = new CustomPayloadManager();
+        RabbitManager.startQueueConsumer();
+
+        getCommand("punishment").setExecutor(new PunishmentCommand());
+        getCommand("mute").setExecutor(new Mute());
+
+        if (Hecate.getServerName().startsWith("HUB")) {
+            getCommand("teleport").setExecutor(new Teleport());
+        }
 
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
-
-        try {
-            List<String> expressions = new ArrayList<>();
-            new ChatFilterExpression().get().forEach(i -> expressions.add(i.getExpression()));
-            PlayerListener.regexStrings.addAll(expressions);
-        } catch (APIException e) {
-            e.printStackTrace();
-        }
     }
 
     static public String exportResource(String resourceName) throws Exception {

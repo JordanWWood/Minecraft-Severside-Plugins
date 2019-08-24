@@ -3,6 +3,8 @@ package network.marble.minigamecore.entities.setting;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.bukkit.Material;
+
 import lombok.Getter;
 
 public class WorldSettings {
@@ -38,4 +40,6 @@ public class WorldSettings {
     @Getter int spawnX = 0;
     @Getter int spawnY = 0;
     @Getter int spawnZ = 0;
+    
+    @Getter Material icon;
 }

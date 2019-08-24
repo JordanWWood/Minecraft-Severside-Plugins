@@ -4,7 +4,7 @@
 
     <groupId>network.marble</groupId>
     <artifactId>Moderation</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>Moderation</name>
@@ -13,13 +13,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>bungeecord-repo</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </repository>
-    </repositories>
 
     <build>
         <plugins>
@@ -43,36 +36,48 @@
         </plugins>
     </build>
 
+	<distributionManagement>
+		<snapshotRepository>
+			<id>nexus.hastesoft.com</id>
+			<url>http://nexus.hastesoft.com/repository/maven-snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>nexus.hastesoft.com</id>
+			<url>http://nexus.hastesoft.com/repository/maven-releases/</url>
+		</repository>
+	</distributionManagement>
+
+
+    <repositories>
+        <repository>
+            <id>nexus.hastesoft.com</id>
+            <url>http://nexus.hastesoft.com/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
-            <version>1.12-SNAPSHOT</version>
-            <type>jar</type>
+            <version>1.14</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-bootstrap</artifactId>
-            <version>1.12-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-api</artifactId>
-            <version>1.12-SNAPSHOT</version>
-            <type>javadoc</type>
-            <scope>provided</scope>
+            <version>1.14</version>
+            <scipe>provided</scipe>
         </dependency>
         <dependency>
             <groupId>network.marble</groupId>
             <artifactId>DataAccessLayer</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>LATEST</version>
+            <version>1.18.6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -84,7 +89,7 @@
         <dependency>
             <groupId>network.marble</groupId>
             <artifactId>Hermes</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

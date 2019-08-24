@@ -15,20 +15,20 @@ import java.util.Arrays;
 
 public class HubCommand extends MinigameCommand {
 
-	public HubCommand() {
-		super("hub");
-		this.commandAliases = Arrays.asList("leave", "quit", "kermitsudoku");
-		this.canBeRunBy = Arrays.asList(PlayerType.ADMINISTRATOR, PlayerType.MODERATOR, PlayerType.PLAYER, PlayerType.SPECTATOR);
-		this.setDescription("Hub Command for Minigame Core");
-	}
+    public HubCommand() {
+        super("hub");
+        this.commandAliases = Arrays.asList("leave", "quit", "kermitsudoku");
+        this.canBeRunBy = Arrays.asList(PlayerType.ADMINISTRATOR, PlayerType.MODERATOR, PlayerType.PLAYER, PlayerType.SPECTATOR);
+        this.setDescription("Hub Command for Minigame Core");
+    }
 
-	@Override
-	public boolean commandExecution(CommandSender sender, String label, String[] args) {
-		MiniGamePlayer mg = PlayerManager.getPlayer((Player)sender);
-		if (mg.playerType == PlayerType.PLAYER && GameManager.getStatus() == GameStatus.INGAME)
-			InventoryAPI.openMenuForPlayer(mg.id, new QuitGameMenu(mg.getPlayer()));
-		else
-			mg.getPlayer().kickPlayer("Hub Command");
-		return true;
-	}
+    @Override
+    public boolean commandExecution(CommandSender sender, String label, String[] args) {
+        MiniGamePlayer mg = PlayerManager.getPlayer((Player)sender);
+        if (mg.playerType == PlayerType.PLAYER && GameManager.getStatus() == GameStatus.INGAME)
+            InventoryAPI.openMenuForPlayer(mg.id, new QuitGameMenu(mg.getPlayer()));
+        else
+            mg.getPlayer().kickPlayer("Hub Command");
+        return true;
+    }
 }

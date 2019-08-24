@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class Serializable2DVector {
-    @Getter int x,z;
+    @Getter private int x,z;
 
     public Serializable2DVector(int x, int z){
         this.x = x;
@@ -27,9 +27,7 @@ public class Serializable2DVector {
         Serializable2DVector o = (Serializable2DVector) obj;
         if (x != o.x)
             return false;
-        if (z != o.z)
-            return false;
-        return true;
+        return z == o.z;
     }
 }
 

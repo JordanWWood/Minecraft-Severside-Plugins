@@ -1,16 +1,18 @@
 name: ModerationSlave
-version: 1.0
-authors: [Wolfii, MarbleNetwork]
+version: ${project.version}
+authors: [Marble Network]
 main: network.marble.moderationslave.ModerationSlave
 prefix: MOD
-depend: [DataAccessLayer]
+depend: [DataAccessLayer, Hecate]
 website: http://marble.network
 
 commands:
   punishment:
-    aliases: [p, punish]
+    aliases: [/,.]
   mute:
     aliases: [m]
+  teleport:
+    aliases: [tp]
 
 permissions:
   moderation.commands.punishment:

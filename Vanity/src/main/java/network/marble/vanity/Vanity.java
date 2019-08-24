@@ -1,12 +1,13 @@
 package network.marble.vanity;
 
-import org.bukkit.plugin.java.JavaPlugin;
-
 import lombok.Getter;
 import network.marble.vanity.listeners.PlayerListener;
 import network.marble.vanity.managers.EquipmentManager;
-import network.marble.vanity.managers.MenuManager;
 import network.marble.vanity.managers.VanityPluginManager;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import network.marble.vanity.managers.MenuManager;
 
 public class Vanity extends JavaPlugin {
     @Getter private static Vanity instance;
@@ -25,11 +26,7 @@ public class Vanity extends JavaPlugin {
 
         menuManager.buildInventoryMenus();
 
-        // What is life?
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
-
         getLogger().info("Vanity successfully loaded.");
-
-        instance.getDataFolder().mkdir();
     }
 }

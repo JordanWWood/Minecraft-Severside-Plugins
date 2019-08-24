@@ -6,12 +6,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import network.marble.dataaccesslayer.base.DataAccessLayer;
-import network.marble.dataaccesslayer.entities.Result;
 import network.marble.dataaccesslayer.exceptions.APIException;
-import network.marble.dataaccesslayer.managers.CacheManager;
 import network.marble.dataaccesslayer.models.base.BaseModel;
-import okhttp3.Request;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +17,7 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Case extends BaseModel<Case> {
     public Case(){
-        super("plugins/moderation/cases", "cases", "case");
+        super("plugins/moderation/cases");
     }
 
     @Getter @Setter
@@ -60,74 +56,45 @@ public class Case extends BaseModel<Case> {
     @Getter @Setter
     public List<UUID> reports;
 
+    @Getter @Setter
+    public boolean requires_review;
+
+    @Getter @Setter
+    public String pipeline;
+
+    @Getter @Setter
+    public String reason;
+
     @Override
     public Class<?> getTypeClass() {
         return Case.class;
     }
 
     public List<Case> getActiveByJudgementeeOutcome(UUID id, CaseOutcome outcome) throws APIException {
-        return getMultiple(urlEndPoint+"/judgementee/"+id+"/"+outcome+"/active");
+        return getsFromURL(urlEndPoint+"/judgementee/"+id+"/"+outcome.toValue()+"/active");
     }
 
     public List<Case> getByJudgementee(UUID id) throws APIException {
-        return getMultiple(urlEndPoint+"/judgementee/"+id);
+        return getsFromURL(urlEndPoint+"/judgementee/"+id);
     }
 
     public List<Case> getOpenByJudgementee(UUID id) throws APIException {
-        return getMultiple(urlEndPoint+"/judgementee/"+id+"/open");
+        return getsFromURL(urlEndPoint+"/judgementee/"+id+"/open");
     }
 
     public List<Case> getByClosedJudgementee(UUID id) throws APIException {
-        return getMultiple(urlEndPoint+"/judgementee/"+id+"/closed");
+        return getsFromURL(urlEndPoint+"/judgementee/"+id+"/closed");
     }
 
     public List<Case> getByAssignee(UUID id) throws APIException {
-        return getMultiple(urlEndPoint+"/assignee/"+id);
+        return getsFromURL(urlEndPoint+"/assignee/"+id);
     }
 
     public List<Case> getOpenByAssignee(UUID id) throws APIException {
-        return getMultiple(urlEndPoint+"/assignee/"+id+"/open");
+        return getsFromURL(urlEndPoint+"/assignee/"+id+"/open");
     }
 
     public List<Case> getByClosedAssignee(UUID id) throws APIException {
-        return getMultiple(urlEndPoint+"/assignee/"+id+"/closed");
-    }
-
-    public Case saveAndReturn() throws APIException {
-        return this.exists() ? updateAndReturn() : insertAndReturn();
-    }
-
-    public Case updateAndReturn() throws APIException {
-        return updateAndReturn(urlEndPoint + "/" + this.id.toString());
-    }
-
-    protected Case updateAndReturn(String url) throws APIException {
-        String json = serializeModel(this);
-        Request r = context.putRequest(url, json);
-        String returned = context.executeRequest(r);
-        utils.errorCheck(returned);
-        Result result = deserializeModel(returned, Result.class);
-        if (result.getReplaced() > 0 || result.getUnchanged() > 0) {
-            if (CacheManager.getInstance().getCache().containsKey(this.id) && CacheManager.enabled) CacheManager.getInstance().getCache().replace(this.id, this);
-            return this;
-        } else return null;
-    }
-
-    public Case insertAndReturn() throws APIException {
-        return insertAndReturn(urlEndPoint);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected Case insertAndReturn(String url) throws APIException {
-        String json = serializeModel((Case)this);
-        Request r = context.postRequest(url, json);
-        String returned = context.executeRequest(r);
-        utils.errorCheck(returned);
-        Result result = deserializeModel(returned, Result.class);
-        if ((result.getInserted() > 0) && result.getGeneratedKeys().size() > 0) {
-            this.id = result.getGeneratedKeys().get(0);
-            if (CacheManager.getInstance().getCache().containsKey(this.id) && CacheManager.enabled) CacheManager.getInstance().getCache().replace(this.id, this);
-            return this;
-        } else return null;
+        return getsFromURL(urlEndPoint+"/assignee/"+id+"/closed");
     }
 }

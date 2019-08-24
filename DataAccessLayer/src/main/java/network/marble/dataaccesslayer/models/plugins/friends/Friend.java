@@ -8,9 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
-import okhttp3.Request;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +17,7 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Friend extends BaseModel<Friend> {
     public Friend(){
-        super("plugins/friends", "friends", "friend");
+        super("plugins/friends");
     }
 
     @Getter @Setter
@@ -36,19 +34,19 @@ public class Friend extends BaseModel<Friend> {
     public long accepted_at;
 
     public List<Friend> getFriendsOf(UUID uuid) throws APIException {
-        return getMultiple(urlEndPoint+"/of/"+uuid.toString());
+        return getsFromURL(urlEndPoint+"/of/"+uuid.toString());
     }
 
     public List<Friend> getFriendRequestsInvolving(UUID uuid) throws APIException {
-        return getMultiple(urlEndPoint+"/requests/"+uuid.toString());
+        return getsFromURL(urlEndPoint+"/requests/"+uuid.toString());
     }
 
     public List<Friend> getFriendRequestsTo(UUID uuid) throws APIException {
-        return getMultiple(urlEndPoint+"/requests/to/"+uuid.toString());
+        return getsFromURL(urlEndPoint+"/requests/to/"+uuid.toString());
     }
 
     public List<Friend> getFriendRequestsFrom(UUID uuid) throws APIException {
-        return getMultiple(urlEndPoint+"/requests/from/"+uuid.toString());
+        return getsFromURL(urlEndPoint+"/requests/from/"+uuid.toString());
     }
 
     @Override

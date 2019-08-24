@@ -5,136 +5,47 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>network.marble</groupId>
-    <artifactId>InventoryAPI</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <artifactId>InventoryAPI-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>2.0.2</version>
 
-        <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <version>2.4</version>
-                        <configuration>
-                            <finalName>${project.name}</finalName>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+    <name>InventoryAPI-parent</name>
 
-      <distributionManagement>
-    <repository>
-      <id>nexus</id>
-      <name>Releases</name>
-      <url>http://92.222.65.68:8081/repository/maven-releases</url>
-    </repository>
-    <snapshotRepository>
-      <id>nexus</id>
-      <name>Snapshot</name>
-      <url>http://92.222.65.68:8081/repository/maven-snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
-    
-    <build>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-http</artifactId>
-                <version>2.6</version>
-            </extension>
-        </extensions>
+	<distributionManagement>
+		<snapshotRepository>
+			<id>nexus.hastesoft.com</id>
+			<url>http://nexus.hastesoft.com/repository/maven-snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>nexus.hastesoft.com</id>
+			<url>http://nexus.hastesoft.com/repository/maven-releases/</url>
+		</repository>
+	</distributionManagement>
 
-        <finalName>${artifactId}</finalName>
-        <defaultGoal>clean install</defaultGoal>
-        <resources>
-            <resource>
-                <targetPath>.</targetPath>
-                <filtering>true</filtering>
-                <directory>${basedir}/src/main/resources</directory>
-                <includes>
-                    <include>*.yml</include>
-                </includes>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<downloadSources>true</downloadSources>
-					<downloadJavadocs>false</downloadJavadocs>
-				</configuration>
-			</plugin>
-
-			<!-- Set a compiler level -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-			
-			<!-- Maven Shade Plugin -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.3</version>
-				<executions>
-					<!-- Run shade goal on package phase -->
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<transformers>
-								<!-- add Main-Class to manifest file -->
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>network.marble.inventoryapi.InventoryAPIPlugin</mainClass>
-								</transformer>
-							</transformers>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-        </plugins>
-    </build>
+    <modules>
+        <module>InventoryAPI</module>
+        <module>Bootstrap</module>
+        <module>v1_8_R3</module>
+        <module>v1_12_R1</module>
+    </modules>
 
     <repositories>
         <repository>
-			<id>spigot-repo</id>
-			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-		</repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>nexus.hastesoft.com</id>
+            <url>http://nexus.hastesoft.com/repository/maven-public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
-   		<dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.12.2</version>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.14-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-			<groupId>org.spigotmc</groupId>
-			<artifactId>spigot-api</artifactId>
-			<version>1.12-R0.1-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.bukkit</groupId>
-			<artifactId>bukkit</artifactId>
-			<version>1.12-R0.1-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
     </dependencies>
-
 </project>

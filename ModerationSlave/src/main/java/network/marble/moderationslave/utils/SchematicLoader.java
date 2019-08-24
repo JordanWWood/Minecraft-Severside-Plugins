@@ -39,7 +39,7 @@ public class SchematicLoader {
         }
 
         String materials = getChildTag(schematic, "Materials", StringTag.class).getValue();
-        if (!materials.equals("Alpha")) {
+        if (!"Alpha".equals(materials)) {
             nbtStream.close();
             throw new IllegalArgumentException("Schematic file is not an Alpha schematic");
         }

@@ -1,6 +1,6 @@
 package network.marble.dataaccesslayer.entities;
 
-import com.google.gson.annotations.SerializedName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -8,18 +8,18 @@ import lombok.ToString;
 public class TokenResponse {
 
     @Getter
-    @SerializedName("access_token")
+    @JsonProperty("access_token")
     private String accessToken;
 
     @Getter
-    @SerializedName("expires_in")
+    @JsonProperty("expires_in")
     private int expiresIn;
 
     @Getter
-    @SerializedName("token_type")
+    @JsonProperty("token_type")
     private String tokenType;
 
     @Getter
-    @SerializedName("error")
+    @JsonProperty("error")
     private String error;
 }

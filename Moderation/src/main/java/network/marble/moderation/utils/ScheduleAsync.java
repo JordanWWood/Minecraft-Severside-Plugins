@@ -15,11 +15,8 @@ public class ScheduleAsync {
      * @param timeUnit The {@link TimeUnit} of the time parameter.
      */
     public ScheduleAsync(final Runnable runnable, long time, TimeUnit timeUnit) {
-        ProxyServer.getInstance().getScheduler().schedule(Moderation.getInstance(), new Runnable() {
-            @Override
-            public void run() {
+        ProxyServer.getInstance().getScheduler().schedule(Moderation.getInstance(), () -> {
                 ProxyServer.getInstance().getScheduler().runAsync(Moderation.getInstance(), runnable);
-            }
         }, time, timeUnit);
     }
 }

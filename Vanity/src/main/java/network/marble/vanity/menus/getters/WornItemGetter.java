@@ -13,18 +13,20 @@ import network.marble.vanity.managers.EquipmentManager;
  * Created by jorda_000 on 22/06/2017.
  */
 public class WornItemGetter implements ItemStackGetter {
+    private Slot slot;
 
-	private Slot slot;
-	public	 WornItemGetter(Slot slot) {
-		this.slot = slot;
-	}
+    public WornItemGetter(Slot slot) {
+        this.slot = slot;
+    }
 
-	@Override
-	public ItemStack getItemStack(InventoryItem inventoryItem, Player player) {
-		if (!EquipmentManager.getPlayerEquipment().containsKey(player.getUniqueId())) return new ItemStack(Material.AIR);
-		if (!EquipmentManager.getPlayerEquipmentBySlot().get(player.getUniqueId()).containsKey(slot)) return new ItemStack(Material.AIR);
 
-		ItemStack stack = EquipmentManager.getPlayerEquipmentBySlot().get(player.getUniqueId()).get(slot);
-		return stack;
-	}
+    @Override
+    public ItemStack getItemStack(InventoryItem inventoryItem, Player player) {
+        if (!EquipmentManager.getPlayerEquipment().containsKey(player.getUniqueId())) return new ItemStack(Material.AIR);
+        if (!EquipmentManager.getPlayerEquipmentBySlot().get(player.getUniqueId()).containsKey(slot)) return new ItemStack(Material.AIR);
+
+        ItemStack stack = EquipmentManager.getPlayerEquipmentBySlot().get(player.getUniqueId()).get(slot);
+
+        return stack;
+    }
 }

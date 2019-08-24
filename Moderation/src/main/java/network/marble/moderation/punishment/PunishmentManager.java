@@ -9,18 +9,17 @@ import network.marble.dataaccesslayer.models.plugins.moderation.Case;
 import network.marble.dataaccesslayer.models.plugins.moderation.JudgementSession;
 import network.marble.dataaccesslayer.models.user.User;
 import network.marble.moderation.Moderation;
-import network.marble.moderation.punishment.communication.RabbitListener;
+import network.marble.moderation.punishment.communication.RabbitManager;
 import network.marble.moderation.utils.FontFormat;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
 public class PunishmentManager {
     @Getter private HashMap<UUID, PunishmentTask> punishmentTasks = new HashMap<>();
-    private RabbitListener rabbitListener = new RabbitListener();
+    @Getter private RabbitManager rabbitListener = new RabbitManager();
 
     /**
      * Checks if a UserConnection is still online.
@@ -56,11 +55,7 @@ public class PunishmentManager {
      * @param server The Server the User should be connected to.
      */
     private void limbo(UserConnection user, ServerConnection server, UUID caseID) {
-//        try {
-//            rabbitListener.DeclareQueueForPlayer(user.getUniqueId());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        RabbitManager.bindKeyForUser(user.getUniqueId());
 
         User u = null;
         Case c = null;
@@ -72,19 +67,11 @@ public class PunishmentManager {
             return;
         }
 
-        u.setInJudgement(true);
-
-        try {
-            u.save();
-        } catch (APIException e) {
-            e.printStackTrace();
-        }
-
         JudgementSession js = null;
         if (c.getJudgement_session_id() == null) {
             js = new JudgementSession();
             js.setCreated_at(System.currentTimeMillis());
-            js.setJudgementee(u.getId());
+            js.setJudgementee(u.getUuid());
             try {
                 js = js.saveAndReturn();
             } catch (APIException e) {
@@ -108,6 +95,7 @@ public class PunishmentManager {
         }
 
         Case finalC = c;
+
         PunishmentTask punishmentTask = punishmentTasks.computeIfAbsent(user.getUniqueId(), k -> new PunishmentTask(Moderation.getInstance().getProxy(), user, server, finalC));
         user.sendMessage(FontFormat.translateString("&cYou have been moved to Limbo whilst you await a final decision on your punishment by a moderator."));
         punishmentTask.tick();

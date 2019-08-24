@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>network.marble</groupId>
+        <artifactId>InventoryAPI-parent</artifactId>
+        <version>2.0.2</version>
+    </parent>
+
+    <artifactId>InventoryAPI-bootstrap</artifactId>
+    <version>2.0.2</version>
+
+    <build>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-http</artifactId>
+                <version>2.6</version>
+            </extension>
+        </extensions>
+
+        <finalName>InventoryAPI</finalName>
+        <resources>
+            <resource>
+                <targetPath>.</targetPath>
+                <filtering>true</filtering>
+                <directory>../Common/src/main/resources</directory>
+                <includes>
+                    <include>*.yml</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <downloadSources>true</downloadSources>
+                    <downloadJavadocs>false</downloadJavadocs>
+                </configuration>
+            </plugin>
+
+            <!-- Set a compiler level -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <!-- Maven Shade Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <!-- Run shade goal on package phase -->
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <!-- add Main-Class to manifest file -->
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>network.marble.inventoryapi.InventoryAPIPlugin</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <dependencies>
+        <dependency>
+            <groupId>network.marble</groupId>
+            <artifactId>InventoryAPI</artifactId>
+            <version>2.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>network.marble</groupId>
+            <artifactId>InventoryAPI-v1_8_R3</artifactId>
+            <version>2.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>network.marble</groupId>
+            <artifactId>InventoryAPI-v1_12_R1</artifactId>
+            <version>2.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+</project>

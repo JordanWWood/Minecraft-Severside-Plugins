@@ -8,7 +8,6 @@ import lombok.Setter;
 import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
-import okhttp3.Request;
 import org.bukkit.Material;
 
 @Data
@@ -16,7 +15,7 @@ import org.bukkit.Material;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Currency extends BaseModel<Currency> {
     public Currency(){
-        super("plugins/currency/currencies", "currencies", "currency");
+        super("plugins/currency/currencies");
     }
 
     @Getter @Setter
@@ -34,7 +33,7 @@ public class Currency extends BaseModel<Currency> {
     }
 
     public Currency getByName(String name) throws APIException {
-        return getSingle(urlEndPoint+"/name/"+name);
+        return getFromURL(urlEndPoint+"/name/"+name);
     }
 
     @Override

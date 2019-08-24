@@ -7,6 +7,8 @@ import net.md_5.bungee.ServerConnection;
 import net.md_5.bungee.UserConnection;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.protocol.packet.KeepAlive;
 
 import java.util.ArrayList;
@@ -18,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.plugins.moderation.Case;
 import network.marble.dataaccesslayer.models.plugins.moderation.CaseOutcome;
-import network.marble.dataaccesslayer.models.user.User;
 import network.marble.hermes.Hermes;
 import network.marble.moderation.Moderation;
 import network.marble.moderation.utils.ScheduleAsync;
@@ -44,39 +45,41 @@ public class PunishmentTask {
         this.aCase = aCase;
     }
 
-    int i = 0;
     void tick() {
+        Moderation.getInstance().getLogger().info("Tick for player " + user.getUniqueId());
         // Send KeepAlive Packet so that the client won't time out.
         user.unsafe().sendPacket(new KeepAlive(RANDOM.nextInt()));
 
-        for (String s : messages) {
+        for (String s : messages)
             user.sendMessage(s);
-        }
         messages.clear();
 
-        User u = null;
         Case c = null;
         try {
-            u = new User().getByUUID(user.getUniqueId());
+            Moderation.getInstance().getLogger().info("Enter case retrieve try");
             c = new Case().get(aCase.getId());
-        } catch (APIException e) {
-            e.printStackTrace();
-        }
 
-        if(c != null) {
-            Moderation.getInstance().getLogger().info(c.isPardoned() + " pardoned");
-            Moderation.getInstance().getLogger().info(c.getId() + "");
             if (c.isPardoned()) {
                 //move player to sufficient hub
                 Moderation.getPunishmentManager().cancelPunishmentTask(user.getUniqueId());
-                user.connect(Hermes.getBestHub(server.getInfo().getName()).getServerInfo());
+                ServerInfo serverInfo = Hermes.getBestHub(server.getInfo().getName()).getServerInfo();
+
+                if (user.getPendingConnection().getVersion() == 47) { // 1.8 uses protocol version 47
+                    user.disconnect("You have been Pardoned, please reconnect to the network");
+                } else {
+                    user.connectNow(serverInfo, ServerConnectEvent.Reason.KICK_REDIRECT);
+                }
 
                 return;
+            } else if (c.getOutcome().equals(CaseOutcome.Kicked)) {
+                user.disconnect("You have been kicked from the network. You may now reconnect");
             } else if (c.getOutcome().equals(CaseOutcome.PermanentlyBan)) {
                 user.disconnect("You have been permanently banned!");
             } else if (c.getOutcome().equals(CaseOutcome.TemporaryBan)) {
                 user.disconnect("You have been banned!");
             }
+        } catch (APIException e) {
+            e.printStackTrace();
         }
 
         // Schedule next tick.
@@ -86,6 +89,6 @@ public class PunishmentTask {
                 } else {
                     Moderation.getPunishmentManager().cancelPunishmentTask(user.getUniqueId());
                 }
-            } , Moderation.getPunishmentManager().getKeepAliveMillis(), TimeUnit.MILLISECONDS);
+            }, Moderation.getPunishmentManager().getKeepAliveMillis(), TimeUnit.MILLISECONDS);
     }
 }

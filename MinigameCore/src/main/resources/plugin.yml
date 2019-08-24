@@ -1,8 +1,9 @@
 name: MiniGameCore
 main: network.marble.minigamecore.MiniGameCore
-version: 0.0.1-SNAPSHOT
+version: ${project.version}
 author: Marble Network
-depend: [DataAccessLayer, ProtocolLib]
+depend: [DataAccessLayer, ProtocolLib, Scoreboards, Hecate, InventoryAPI]
+softdepend: [Citizens]
 prefix: MGC
 commands:
   debug:

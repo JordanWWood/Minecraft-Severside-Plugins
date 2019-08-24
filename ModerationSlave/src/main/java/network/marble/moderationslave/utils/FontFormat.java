@@ -47,7 +47,7 @@ public enum FontFormat {
     }
     
     static {
-        translate = new HashMap<String, String>();
+        translate = new HashMap<>();
         createMap();
     }
     
@@ -77,11 +77,12 @@ public enum FontFormat {
     }
     
     public static String translateString(String value) {
+        String translated = value;
         for (String code : translate.keySet()) {
-            value = value.replace(code, translate.get(code));
+            translated = translated.replace(code, translate.get(code));
         }
         
-        return value;
+        return translated;
     }
 
     public static String translateString(String value, boolean unicode) {
@@ -148,21 +149,22 @@ public enum FontFormat {
     }
     
     public static List<String> splitLine(String line, int length, String append) {
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
+        String split = line;
         
-        if (length >= line.length()) {
-            lines.add(append + line);
+        if (length >= split.length()) {
+            lines.add(append + split);
             return lines;
         }
         
-        while (line.length() > 0) {
-            if (line.length() >= length) {
-                String l = line.substring(0, length);
+        while (split.length() > 0) {
+            if (split.length() >= length) {
+                String l = split.substring(0, length);
                 l = l.substring(0, l.lastIndexOf(" ") + 1);
                 lines.add(append + l);
-                line = line.substring(l.lastIndexOf(" ") + 1);
+                split = split.substring(l.lastIndexOf(" ") + 1);
             } else {
-                lines.add(append + line);
+                lines.add(append + split);
                 break;
             }
         }
@@ -171,11 +173,12 @@ public enum FontFormat {
     }
 
     private static String replaceUnicodeEscapes(String message) {
+        String escaped = message;
         while (message.contains("\\u")) {
             String code = message.substring(message.indexOf("\\u") + 2, message.indexOf("\\u") + 6);
             int icode = Integer.parseInt(code, 16);
             char ccode = (char) icode;
-            message = message.replace("\\u" + code, ccode + "");
+            escaped = escaped.replace("\\u" + code, ccode + "");
         }
 
         return message;

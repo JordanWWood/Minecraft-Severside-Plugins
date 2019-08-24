@@ -1,6 +1,6 @@
 name: Vanity
-version: 1.0
-authors: [MarbleNetwork]
+version: ${project.version}
+authors: [Marble Network]
 load: postworld
 prefix: VAN
 main: network.marble.vanity.Vanity

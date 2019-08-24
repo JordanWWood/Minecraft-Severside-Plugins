@@ -2,7 +2,7 @@ package network.marble.vanity.managers;
 
 import lombok.Getter;
 import network.marble.vanity.Vanity;
-import network.marble.vanity.api.type.base.VanityItemBase;
+import network.marble.vanity.api.base.VanityPlugin;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,20 +16,20 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class VanityPluginManager {
-    @Getter private Map<String, VanityItemBase> plugins;
+    @Getter private Map<String, VanityPlugin> plugins;
 
     public VanityPluginManager() {
         plugins = new HashMap<>();
 
-        init();
+        Init();
     }
 
-    private void init() {
+    private void Init() {
         Vanity.getInstance().getLogger().info("Loading VanityItems");
         File loc = Vanity.getInstance().getDataFolder();
 
         if (!loc.exists()) {
-            Vanity.getInstance().getLogger().warning("Unable to find vanity folder ("+loc.getAbsolutePath()+"). Creating");
+            Vanity.getInstance().getLogger().info("Unable to find vanity folder ("+loc.getAbsolutePath()+"). Creating");
 
             loc.mkdir();
         }
@@ -42,7 +42,7 @@ public class VanityPluginManager {
         }
 
         for (File f : flist) {
-            VanityItemBase vp = loadVanity(f, Vanity.getInstance());
+            VanityPlugin vp = loadVanity(f, Vanity.getInstance());
             if(vp != null) {
                 try {
                     plugins.put(vp.getName(), vp);
@@ -55,7 +55,7 @@ public class VanityPluginManager {
         Vanity.getInstance().getLogger().info("Loaded Vanity Items");
     }
 
-    private VanityItemBase loadVanity(File file, Vanity plugin) {
+    private VanityPlugin loadVanity(File file, Vanity plugin) {
         String infoFileName = "vanity.info";
 
         try {
@@ -79,7 +79,7 @@ public class VanityPluginManager {
                 for (Class<?> subclasses : classes.getClasses()) {
                     Class.forName(subclasses.getName(), true, loader);
                 }
-                Class<? extends VanityItemBase> typeClass = classes.asSubclass(VanityItemBase.class);
+                Class<? extends VanityPlugin> typeClass = classes.asSubclass(VanityPlugin.class);
                 return typeClass.newInstance();
             } else {
                 Vanity.getInstance().getLogger().warning("Failed to load " + file.getName() + ". Unable to locate "+infoFileName);

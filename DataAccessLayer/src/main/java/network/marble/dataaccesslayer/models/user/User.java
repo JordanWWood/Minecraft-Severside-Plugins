@@ -1,12 +1,12 @@
 package network.marble.dataaccesslayer.models.user;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import network.marble.dataaccesslayer.bukkit.DataAccessLayer;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
 import network.marble.dataaccesslayer.models.plugins.friends.Friend;
@@ -19,7 +19,7 @@ import java.util.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User extends BaseModel<User> {
     public User() {
-        super("users", "users", "user");
+        super("users");
     }
 
     @Getter @Setter
@@ -36,6 +36,9 @@ public class User extends BaseModel<User> {
 
     @Getter @Setter
     public String ip;
+
+    @Getter @Setter
+    public Long firstJoin;
 
     @Getter @Setter
     public Map<String,String> preferences = new HashMap<>();
@@ -70,24 +73,48 @@ public class User extends BaseModel<User> {
     @Getter @Setter
     public String language;
 
+    /**
+     *
+     * @deprecated please use {@link BaseModel#get(UUID)} )}
+     * @param uuid given user uuid
+     * @return database user object
+     * @throws APIException error
+     */
+    @Deprecated
+    @JsonIgnore
     public User getByUUID(UUID uuid) throws APIException {
-        return getSingle(urlEndPoint+"/uuid/"+uuid.toString());
+        return get(uuid);
     }
 
     /***
      * Get a user model of a player by their username
      * @param username Converted to lowercase for searching internally
      * @return User model of the user with the entered username or null if no user is found
-     * @throws APIException
+     * @throws APIException error
      */
+    @JsonIgnore
     public User getByUsername(String username) throws APIException {
-        return getSingle(urlEndPoint+"/name/"+username.toLowerCase());
+        return getFromURL(urlEndPoint+"/name/"+username.toLowerCase());
     }
 
+    @JsonIgnore
     public User getByForumId(int forumId) throws APIException {
-        return getSingle(urlEndPoint+"/forumid/"+forumId);
+        return getFromURL(urlEndPoint+"/forumid/"+forumId);
     }
 
+    /**
+     * Returns the top 10 players for the given currency
+     *
+     * @param currency the currency to sort by
+     * @param page the page to return
+     * @return a sorted list of 10 users in order of who has the most of the given currency
+     */
+    @JsonIgnore
+    public List<User> getCurrencyTop(UUID currency, int page) throws APIException {
+        return getsFromURL(urlEndPoint+"/currency/"+currency.toString()+"/"+page+"/top");
+    }
+
+    @JsonIgnore
     public List<Friend> getFriendsOf() {
         try {
             return new Friend().getFriendsOf(this.getUuid());
@@ -105,9 +132,12 @@ public class User extends BaseModel<User> {
             u = new User().getByUUID(uuid);
         } catch (APIException e) {
             e.printStackTrace();
+            friends = Collections.emptyList();
         }
-        for (int i = 0; i < friends.size(); i++) {
-            return u.getUuid().equals(friends.get(i).getSender()) || u.getUuid().equals(friends.get(i).getReceiver());
+        for (Friend friend : friends) {
+            if (u.getUuid().equals(friend.getSender()) || u.getUuid().equals(friend.getReceiver())) {
+                return true;
+            }
         }
         return false;
     }
@@ -118,7 +148,6 @@ public class User extends BaseModel<User> {
         try {
             rank = new Rank().getFull(this.rank_id);
         } catch (APIException e) {
-            DataAccessLayer.getInstance().logger.warning("Failed to find user rank model");
             e.printStackTrace();
             return false;
         }
@@ -138,5 +167,12 @@ public class User extends BaseModel<User> {
     @Override
     public Class<?> getTypeClass() {
         return User.class;
+    }
+
+
+    // Override base model methods that utilise the uuid as primary key
+    @Override
+    public UUID getId() {
+        return this.uuid;
     }
 }

@@ -9,10 +9,7 @@ import network.marble.minigamecore.entities.team.TeamSetup;
 import network.marble.minigamecore.entities.player.MiniGamePlayer;
 import org.bukkit.Bukkit;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TeamManager {
@@ -50,7 +47,7 @@ public class TeamManager {
             teamFound = true;
             st = team.getScoreboardTeamPacket();
             st.setMode(3);
-            st.setPlayers(Arrays.asList(player.getPlayer().getUniqueId().toString()));
+            st.setPlayers(Collections.singletonList(player.getPlayer().getUniqueId().toString()));
             Bukkit.getOnlinePlayers().forEach(st::sendPacket);
             break;
         }
@@ -63,7 +60,7 @@ public class TeamManager {
         //MiniGameCore.simpleScoreboardManager.registerTeamWithScoreboard(newTeam);
         st = newTeam.getScoreboardTeamPacket();
         st.setMode(0);
-        st.setPlayers(Arrays.asList(player.id.toString()));
+        st.setPlayers(Collections.singletonList(player.id.toString()));
         Bukkit.getOnlinePlayers().forEach(st::sendPacket);
     }
 
@@ -74,7 +71,7 @@ public class TeamManager {
             team.getPlayers().remove(player);
             WrapperPlayServerScoreboardTeam st = team.getScoreboardTeamPacket();
             st.setMode(4);
-            st.setPlayers(Arrays.asList(player.id.toString()));
+            st.setPlayers(Collections.singletonList(player.id.toString()));
             Bukkit.getOnlinePlayers().forEach(st::sendPacket);
         }
         if (removeTeamIfEmpty && team != null && team.getPlayers().size() <= 0)

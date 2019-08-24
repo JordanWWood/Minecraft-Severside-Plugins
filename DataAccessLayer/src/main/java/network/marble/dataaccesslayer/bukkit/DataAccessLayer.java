@@ -14,7 +14,7 @@ public class DataAccessLayer extends JavaPlugin
 
     @Override
     public void onEnable() {
-        instance = new network.marble.dataaccesslayer.base.DataAccessLayer(getLogger());
+        instance = new network.marble.dataaccesslayer.base.DataAccessLayer(getLogger(), getDataFolder());
         instance.onEnable();
         GetServerName l = new GetServerName(this);
         getServer().getPluginManager().registerEvents(l, this);

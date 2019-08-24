@@ -10,6 +10,6 @@ import java.util.UUID;
 @ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BlockedUser {
-	UUID user_id;
-	long blocked_at;
+    UUID user_id;
+    long blocked_at;
 }

@@ -32,7 +32,7 @@ public class GameEvents implements Listener {
                     MiniGameCore.logger.severe("Failed to save user analytics because: "+e.getMessage());
                 }
                 TimerManager.getInstance().runIn((timer, last) -> {
-                    MiniGameCore.logger.severe("Server will now shutdown");
+                    MiniGameCore.logger.info("Server will now shutdown");
                     Bukkit.getServer().shutdown();
                 }, 15, TimeUnit.SECONDS);
             }

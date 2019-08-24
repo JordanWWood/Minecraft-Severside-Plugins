@@ -1,51 +1,46 @@
 package network.marble.dataaccesslayer.managers;
 
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Consumer;
+import lombok.NonNull;
 import network.marble.dataaccesslayer.base.DataAccessLayer;
 import network.marble.dataaccesslayer.consumers.RabbitConsumer;
+import network.marble.dataaccesslayer.entities.rabbit.RabbitResult;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.TimeoutException;
 
 public class RabbitManager {
     private static RabbitManager instance;
+    private Connection connection;
 
-    private Channel globalChannel;
-    private static Consumer consumer;
-
-    private final String EXCHANGENAME = "dal";
-    private String queueName;
-
-    public void startQueueConsumer() {
-        Channel channel = getChannel();
-        if (consumer == null) consumer = new RabbitConsumer(channel);
+    RabbitManager() {
         try {
-            channel.basicConsume( queueName, true, consumer);
-        } catch (IOException e) {
+            connection = DataAccessLayer.instance.getRabbitMQConnection();
+        } catch (KeyManagementException | TimeoutException | NoSuchAlgorithmException | IOException | URISyntaxException e) {
+            DataAccessLayer.instance.logger.severe("Rabbit Connection error: "+e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public void stopQueueConsumer() {
-        if (globalChannel != null) try {
-            globalChannel.queueDelete(queueName);
-            globalChannel.abort();
+    public RabbitResult getChannel(@NonNull String exchangeName, String exchangeType, String... routingKeys) {
+        try {
+            Channel channel = connection.createChannel();
+            channel.exchangeDeclare(exchangeName, exchangeType);
+            String queueName = channel.queueDeclare().getQueue();
+            for (String routingKey : routingKeys) {
+                channel.queueBind(queueName, exchangeName, routingKey);
+            }
+            return new RabbitResult(channel, queueName);
         } catch (IOException e) {
+            DataAccessLayer.instance.logger.severe("Rabbit getChannel error: "+e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    public Channel getChannel() {
-        if (globalChannel == null || !globalChannel.isOpen()) try {
-            Channel channel = DataAccessLayer.instance.getRabbitMQConnection().createChannel();
-            channel.exchangeDeclare(EXCHANGENAME, "topic");
-            queueName = channel.queueDeclare().getQueue();
-            channel.queueBind(queueName, EXCHANGENAME, "cache.update.all");
-            globalChannel = channel;
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        return globalChannel;
+        return null;
     }
 
     public static RabbitManager getInstance() {

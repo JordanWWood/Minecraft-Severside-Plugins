@@ -16,13 +16,13 @@ import network.marble.minigamecore.managers.WorldManager;
 public class BlockEvents implements Listener {
 
     @SuppressWarnings("deprecation")
-	@EventHandler
+    @EventHandler
     public void onLeafDecay(LeavesDecayEvent e) {
         String worldName = e.getBlock().getLocation().getWorld().getName();
         WorldSettings worldSettings = WorldManager.getCurrentWorldsSettings().get(worldName);
         if (worldSettings != null) {
-        	e.getBlock().setData((byte)(e.getBlock().getData()+4));
-        	e.setCancelled(worldSettings.isDisableLeafDecay());
+            e.getBlock().setData((byte)(e.getBlock().getData()+4));
+            e.setCancelled(worldSettings.isDisableLeafDecay());
         }
     }
 

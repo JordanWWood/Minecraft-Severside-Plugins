@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
-import network.marble.dataaccesslayer.models.GameMode;
 import network.marble.dataaccesslayer.models.plugins.badge.Badge;
 
 @Data
@@ -22,6 +21,6 @@ public class BadgesInProgress {
 
     @JsonIgnore
     public Badge getBadge() throws APIException{
-    	return new Badge().get(badge_id);
+        return new Badge().get(badge_id);
     }
 }

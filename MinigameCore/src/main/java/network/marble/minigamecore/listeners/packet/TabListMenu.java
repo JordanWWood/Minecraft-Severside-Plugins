@@ -31,7 +31,7 @@ public class TabListMenu extends PacketAdapter {
                 packet.getData().forEach(info -> {
                     MiniGamePlayer packetPlayer = PlayerManager.getPlayer(info.getProfile().getUUID());
                     if (packetPlayer == null)
-                        MiniGameCore.logger.warning("Player (TabListMenu:30) was null when checking TabListMenu, assumed player should be hidden from other player");
+                        MiniGameCore.logger.info("Player (TabListMenu:30) ing TabListMenu, assumed player should be hidden from other player");
                     if (packetPlayer != null && canSeeOtherType(player.playerType, packetPlayer.playerType))
                         players.add(info);
 

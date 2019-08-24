@@ -1,6 +1,5 @@
 package network.marble.dataaccesslayer.models;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.Getter;
@@ -8,20 +7,14 @@ import lombok.Setter;
 import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
-import okhttp3.Request;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Data
 @ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GameMode extends BaseModel<GameMode> {
-    public GameMode(){
-        super("games/modes", "gamemodes", "gamemode");
-    }
-
     @Getter @Setter
     public String name;
 
@@ -31,6 +24,7 @@ public class GameMode extends BaseModel<GameMode> {
     @Getter @Setter
     public String description;
 
+    @Getter @Setter
     public String iconMap;
 
     @Getter @Setter
@@ -60,13 +54,20 @@ public class GameMode extends BaseModel<GameMode> {
     @Getter @Setter
     public int maxTeamCount;
 
+    @Getter @Setter
+    public List<Integer> supportedProtocols;
+
+    public GameMode(){
+        super("games/modes");
+    }
+
     /*public Map<String, Object> getIconMap() {
-    	Gson g = new Gson();
-    	Map<String, Object> map = null;
-    	if (iconMap != null && !iconMap.isEmpty()) {
-    		map = g.fromJson(iconMap, new TypeToken<Map<String, Object>>(){}.getType());
-    	}
-		return map;
+        Gson g = new Gson();
+        Map<String, Object> map = null;
+        if (iconMap != null && !iconMap.isEmpty()) {
+            map = g.fromJson(iconMap, new TypeToken<Map<String, Object>>(){}.getType());
+        }
+        return map;
     }
 
     public void setIconMap(Map<String, Object> map) {
@@ -75,7 +76,7 @@ public class GameMode extends BaseModel<GameMode> {
     }*/
 
     public List<GameMode> getGameModesByGameId(UUID uuid) throws APIException {
-        return getMultiple("games/"+uuid.toString()+"/modes/");
+        return getsFromURL("games/"+uuid.toString()+"/modes/");
     }
 
     @Override

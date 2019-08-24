@@ -1,5 +1,26 @@
 package network.marble.minigamecore.managers;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import network.marble.hecate.Hecate;
+import network.marble.minigamecore.entities.analytics.server.WorldSetEvent;
+import network.marble.minigamecore.entities.analytics.server.WorldUnsetEvent;
+import org.apache.commons.io.FileUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.WorldCreator;
+
 import lombok.Getter;
 import network.marble.dataaccesslayer.models.GameMode;
 import network.marble.minigamecore.MiniGameCore;
@@ -7,17 +28,6 @@ import network.marble.minigamecore.entities.setting.WorldSettings;
 import network.marble.minigamecore.entities.world.BlankChunkGenerator;
 import network.marble.minigamecore.entities.world.World;
 import network.marble.minigamecore.utils.ZipUtils;
-import org.apache.commons.io.FileUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.WorldCreator;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 public class WorldManager {
     private final List<String> FORBIDDENNAMES = Arrays.asList(".oracle_jre_usage", "logs", "plugins", "timings", "world", "world_nether", "world_the_end");
@@ -38,7 +48,11 @@ public class WorldManager {
 
     private void init() {
         MiniGameCore.logger.info("Loading Worlds");
-        File loc = new File(MiniGameCore.instance.getDataFolder(),"worlds");
+
+        File loc = null;
+        if (!Hecate.devNetFlagSet)
+          loc = new File(File.separator + "data" + File.separator + "minigame");
+        else loc = new File(MiniGameCore.instance.getDataFolder() + File.separator + "worlds");
 
         if (!loc.exists()) loc.mkdirs();
 
@@ -60,6 +74,15 @@ public class WorldManager {
         }
         MiniGameCore.logger.info("Loaded Worlds");
     }
+    
+    /***
+     * Injects a custom world into the WorldManager
+     * @param world The world to inject
+     */
+    public void injectCustomWorld(org.bukkit.World world) {
+    	World w = new World(world.getName(), world.getName(), new ArrayList<>(), null);
+    	worlds.put(world.getName(), w);
+    }
 
     public boolean loadWorld(String worldName) {
         MiniGameCore.logger.info("Setting world to "+worldName);
@@ -69,6 +92,7 @@ public class WorldManager {
             MiniGameCore.logger.info("Unable to find world "+worldName);
             return false;
         }
+        AnalyticsManager.getInstance().submitServerEvent(new WorldSetEvent(worldName));
         installWorld(worldName, GameManager.getGameMode());
         MiniGameCore.logger.info("World "+worldName+" installed");
         currentWorlds.put(worldName, world);
@@ -78,6 +102,7 @@ public class WorldManager {
 
     public boolean unloadWorld(String worldName) {
         if (currentWorlds.containsKey(worldName)) {
+            AnalyticsManager.getInstance().submitServerEvent(new WorldUnsetEvent(worldName));
             uninstallWorld(worldName);
         }
         return true;
@@ -148,9 +173,10 @@ public class WorldManager {
             org.bukkit.World world = Bukkit.getWorld(currentWorld.getName());
             if (world != null) Bukkit.getServer().unloadWorld(world, false);
             File worldLocation = new File(new File(".").getAbsolutePath()+"/"+currentWorld.getName());
-            /*if (worldLocation.exists()) */Files.delete(worldLocation.toPath());
+            Runtime.getRuntime().exec("rm -rf " + worldLocation.getAbsolutePath());//TODO security
+            /*if (worldLocation.exists()) Files.delete(worldLocation.toPath());*/
         } catch(IOException e) {
-            MiniGameCore.logger.severe("Failed to uninstall world: "+e.getMessage());
+            MiniGameCore.logger.info("Failed to uninstall world: "+e.getMessage());
             e.printStackTrace();
         } else MiniGameCore.logger.warning("Failed to find world "+worldName);
     }

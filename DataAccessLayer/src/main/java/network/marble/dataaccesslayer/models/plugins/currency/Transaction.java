@@ -8,7 +8,6 @@ import lombok.Setter;
 import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
-import okhttp3.Request;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +17,7 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Transaction extends BaseModel<Transaction> {
     public Transaction(){
-        super("plugins/currency/transactions", "transactions", "transaction");
+        super("plugins/currency/transactions");
     }
 
     @Getter @Setter
@@ -37,15 +36,15 @@ public class Transaction extends BaseModel<Transaction> {
     public String description;
 
     public List<Transaction> GetForUser(UUID id) throws APIException {
-        return getMultiple(urlEndPoint+"/user/"+id.toString());
+        return getsFromURL(urlEndPoint+"/user/"+id.toString());
     }
 
     public List<Transaction> GetForUserBetween(UUID id, long from, long to) throws APIException {
-        return getMultiple(String.format("%s/user/%s/from/%s/to/%s",urlEndPoint, id, from, to));
+        return getsFromURL(String.format("%s/user/%s/from/%s/to/%s",urlEndPoint, id, from, to));
     }
 
     public List<Transaction> GetBetween(long from, long to) throws APIException {
-        return getMultiple(String.format("%s/from/%s/to/%s",urlEndPoint, from, to));
+        return getsFromURL(String.format("%s/from/%s/to/%s",urlEndPoint, from, to));
     }
 
     @Override

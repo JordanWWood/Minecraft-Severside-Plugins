@@ -13,7 +13,7 @@ import network.marble.vanity.api.Slot;
 import network.marble.vanity.api.type.base.VanityItemBase;
 
 public abstract class CyclingVanityItem extends VanityItemBase {
-	private BukkitTask task;
+    private BukkitTask task;
 
     protected int interval;
 
@@ -27,29 +27,30 @@ public abstract class CyclingVanityItem extends VanityItemBase {
      * @param p
      * @param slot
      */
-    public CyclingVanityItem(Player pl, int interval, Slot slot, String name) {
-    	super(slot, materials.get(0), name);
+    public CyclingVanityItem(int interval, Player p, Slot slot, String name) {
+        super(p, slot, name);
         this.interval = interval;
+        this.p = p;
     }
 
-    public void equip(Player player) {
-        task = Bukkit.getScheduler().runTaskTimer(Vanity.getInstance(), () -> this.run(player), 0L, interval);
-        super.equip(player);
+    @Override
+    public void invoke() {
+        task = Bukkit.getScheduler().runTaskTimer(Vanity.getInstance(), this::run, 0L, interval);
+        super.invoke();
     }
 
     private int index = 0;
-    
     @Override
-    protected void run(Player player) {
+    protected void run() {
         if (index >= materials.size()) index = 0;
         nextItem = materials.get(index);
 
-        super.run(player);
+        super.run();
         index++;
     }
 
-    public void unEquip(Player player) {
+    public void cancel() {
         task.cancel();
-        super.unEquip(player);
+        super.cancel();
     }
 }

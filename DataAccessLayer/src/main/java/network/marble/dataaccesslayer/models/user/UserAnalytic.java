@@ -3,13 +3,10 @@ package network.marble.dataaccesslayer.models.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
-import network.marble.dataaccesslayer.bukkit.DataAccessLayer;
 import network.marble.dataaccesslayer.common.Context;
 import network.marble.dataaccesslayer.entities.AnalyticsTree;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
-import network.marble.dataaccesslayer.models.plugins.friends.Friend;
-import network.marble.dataaccesslayer.models.plugins.moderation.Rank;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -21,7 +18,7 @@ import java.util.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserAnalytic extends BaseModel<UserAnalytic> {
     public UserAnalytic() {
-        super("users", "users_analytics", "users_analytic");
+        super("users");
     }
 
     @Getter @Setter
@@ -31,26 +28,26 @@ public class UserAnalytic extends BaseModel<UserAnalytic> {
 
     @Override
     public UserAnalytic get(UUID id) throws APIException {
-        return getSingle(urlEndPoint+"/"+id+"/analytics");
+        return getFromURL(urlEndPoint+"/"+id+"/analytics");
     }
 
     @Override
     public boolean update() throws APIException {
-        return update(urlEndPoint + "/" + this.id.toString()+"/analytics");
+        return _update(urlEndPoint + "/" + this.getId().toString()+"/analytics").success;
     }
 
     @Override
     public boolean insert() throws APIException {
-        return insert(urlEndPoint+"/analytics");
+        return _insert(urlEndPoint+"/analytics").success;
     }
 
     @Override
     public boolean delete() throws APIException {
-        return delete(urlEndPoint + "/" + this.id.toString()+"/analytics");
+        return _delete(urlEndPoint + "/" + this.getId().toString()+"/analytics").success;
     }
 
     public UserAnalytic getSpecific(UUID id, String identifier) throws APIException {
-        return getSingle(urlEndPoint+"/"+id+"/analytics/"+identifier);
+        return getFromURL(urlEndPoint+"/"+id+"/analytics/"+identifier);
     }
 
     public boolean alterAnalyticsValue(String identifier, long amount) throws APIException {

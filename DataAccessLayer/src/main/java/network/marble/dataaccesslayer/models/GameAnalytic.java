@@ -15,7 +15,7 @@ import java.util.UUID;
 public class GameAnalytic extends BaseModel<GameAnalytic> {
 
     public GameAnalytic() {
-        super("games/analytics", "gameanalytics", "gameanalytic");
+        super("games/analytics");
     }
 
     @Getter @Setter

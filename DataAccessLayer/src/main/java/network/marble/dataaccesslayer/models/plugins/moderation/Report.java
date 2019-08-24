@@ -14,7 +14,7 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Report extends BaseModel<Report> {
     public Report(){
-        super("plugins/moderation/reports", "reports", "report");
+        super("plugins/moderation/reports");
     }
 
     @Getter @Setter

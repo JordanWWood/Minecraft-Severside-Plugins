@@ -15,7 +15,7 @@ import org.apache.commons.io.IOUtils;
 
 public class ZipUtils {
     public static String unzipFile(String zipLocation, String fileToUnzip) throws IOException {
-    	String output = null;
+        String output = null;
         ZipFile zip = new ZipFile(zipLocation);
         Enumeration<? extends ZipEntry> enu = zip.entries();
         while (enu.hasMoreElements()) {
@@ -74,7 +74,7 @@ public class ZipUtils {
 
     private static void addDirectoryToZip(ZipOutputStream zos, File srcFile) throws IOException {
         File[] files = srcFile.listFiles();
-        for (File file : files) {
+        if (files == null) for (File file : files) {
 
             if (file.isDirectory()) {
                 addDirectoryToZip(zos, file);

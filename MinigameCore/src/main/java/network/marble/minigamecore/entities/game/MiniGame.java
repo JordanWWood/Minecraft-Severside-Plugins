@@ -9,20 +9,20 @@ import network.marble.minigamecore.entities.team.TeamSetup;
 
 public interface MiniGame {
 
-	// Game Setup
+    // Game Setup
     ArrayList<Listener> getEventListeners();
 
-	String getName();
+    String getName();
 
-	String getVersion();
+    String getVersion();
 
-	UUID getGameId();
+    UUID getGameId();
 
-	ArrayList<TeamSetup> getTeamSetups();
+    ArrayList<TeamSetup> getTeamSetups();
 
-	/**
-	 * If set to true, the team will be setup using the first TeamSetup provided in {link teamSetups}
-	 *
-	 */
+    /**
+     * If set to true, the team will be setup using the first TeamSetup provided in {link teamSetups}
+     *
+     */
     boolean isNumberOfTeamsDynamic();
 }

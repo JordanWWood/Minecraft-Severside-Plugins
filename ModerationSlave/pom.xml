@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>network.marble</groupId>
-    <artifactId>ModerationBukkitSlave</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>ModerationSlave</artifactId>
+    <version>0.1.0</version>
 
     <build>
         <finalName>${artifactId}</finalName>
@@ -44,6 +44,18 @@
             </plugin>
         </plugins>
     </build>
+  
+	<distributionManagement>
+		<snapshotRepository>
+			<id>nexus.hastesoft.com</id>
+			<url>http://nexus.hastesoft.com/repository/maven-snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>nexus.hastesoft.com</id>
+			<url>http://nexus.hastesoft.com/repository/maven-releases/</url>
+		</repository>
+	</distributionManagement>
+
 
     <repositories>
         <repository>
@@ -54,37 +66,35 @@
             <id>dmulloy2-repo</id>
             <url>http://repo.dmulloy2.net/nexus/repository/public/</url>
         </repository>
+        <repository>
+            <id>nexus.hastesoft.com</id>
+            <url>http://nexus.hastesoft.com/repository/maven-public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.12.1-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.12.1-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.12.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>network.marble</groupId>
-            <artifactId>DataAccessLayer</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.12.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>craftbukkit</artifactId>
-            <version>1.12.1-R0.1-SNAPSHOT</version>
+            <version>1.12.2-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.6</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>network.marble</groupId>
+            <artifactId>DataAccessLayer</artifactId>
+            <version>1.2.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -94,21 +104,28 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>jnbt</groupId>
+            <groupId>org.jnbt</groupId>
             <artifactId>jnbt</artifactId>
-            <version>1.1</version>
+            <version>1.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>network.marble</groupId>
             <artifactId>InventoryAPI</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>2.0.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>network.marble</groupId>
-            <artifactId>MessageLibrary</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <artifactId>MessageAPI</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>network.marble</groupId>
+            <artifactId>Hecate</artifactId>
+            <version>1.0.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

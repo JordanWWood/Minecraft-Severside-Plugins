@@ -1,30 +1,36 @@
 package network.marble.minigamecore.managers;
 
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.Consumer;
-import network.marble.dataaccesslayer.bukkit.DataAccessLayer;
-import network.marble.minigamecore.MiniGameCore;
-import network.marble.minigamecore.entities.consumers.RabbitConsumer;
-import network.marble.minigamecore.entities.messages.Message;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.Consumer;
+
+import network.marble.dataaccesslayer.bukkit.DataAccessLayer;
+import network.marble.minigamecore.MiniGameCore;
+import network.marble.minigamecore.entities.consumers.RabbitConsumer;
+import network.marble.minigamecore.entities.messages.Message;
 
 public class RabbitManager {
     private static RabbitManager instance;
 
     private Channel globalChannel;
+    private Connection connection;
     static Consumer consumer;
 
     private final String EXCHANGENAME = "plugins";
 
     public void startQueueConsumer() {
+        try {
+            connection = DataAccessLayer.getInstance().getRabbitMQConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
         Channel channel = getChannel();
         if (channel == null) {
             MiniGameCore.logger.severe("Failed to start message Rabbit consumer");
@@ -49,7 +55,6 @@ public class RabbitManager {
 
     public Channel getChannel() {
         if (globalChannel == null || !globalChannel.isOpen()) try {
-            Connection connection = DataAccessLayer.getInstance().getRabbitMQConnection();
             if (connection == null) {
                 MiniGameCore.logger.severe("Failed to retrieve Rabbit connection");
                 return null;
@@ -60,7 +65,7 @@ public class RabbitManager {
                 return null;
             }
             channel.exchangeDeclare(EXCHANGENAME, "topic");
-            Map<String, Object> args = new HashMap<String, Object>();
+            Map<String, Object> args = new HashMap<>();
             args.put("x-expires", MiniGameCore.TTLMillis+(30000));
             channel.queueDeclare(getQueueName(), false, false, true, args);
 
@@ -80,10 +85,10 @@ public class RabbitManager {
     }
     
     private String getQueueName() {
-		return "mg." + MiniGameCore.instanceId;
-	}
+        return "mg." + MiniGameCore.instanceId;
+    }
 
-	public <T extends Message> void sendMessageUndocumented(T message, String key) {
+    public <T extends Message> void sendMessageUndocumented(T message, String key) {
         sendMessage("atlas."+key, message);
     }
 
@@ -100,7 +105,7 @@ public class RabbitManager {
     }
 
     public <T extends Message> void respondToMessage(T message) {
-    	if (message.respondTo != null && !message.respondTo.isEmpty()) sendMessage(message.respondTo, message);
+        if (message.respondTo != null && !message.respondTo.isEmpty()) sendMessage(message.respondTo, message);
     }
 
     public <T extends Message> void sendMessageToServer(T message) {

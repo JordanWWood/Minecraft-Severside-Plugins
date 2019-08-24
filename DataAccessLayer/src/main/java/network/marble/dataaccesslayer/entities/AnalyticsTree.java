@@ -2,19 +2,10 @@ package network.marble.dataaccesslayer.entities;
 
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
-import network.marble.dataaccesslayer.base.DataAccessLayer;
-import network.marble.dataaccesslayer.common.Context;
-import network.marble.dataaccesslayer.exceptions.APIException;
-import network.marble.dataaccesslayer.models.base.BaseModel;
-import okhttp3.Request;
-import okhttp3.Response;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.UUID;
 
 @ToString
 public class AnalyticsTree {

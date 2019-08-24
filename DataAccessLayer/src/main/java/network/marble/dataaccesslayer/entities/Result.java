@@ -16,19 +16,19 @@ public class Result {
     private List<UUID> generatedKeys;
 
     @Getter
-    @JsonProperty("Inserted")
+    @JsonProperty("inserted")
     private int inserted;
 
     @Getter
-    @JsonProperty("Replaced")
+    @JsonProperty("replaced")
     private int replaced;
 
     @Getter
-    @JsonProperty("Unchanged")
+    @JsonProperty("unchanged")
     private int unchanged;
 
     @Getter
-    @JsonProperty("Errors")
+    @JsonProperty("errors")
     private int errors;
 
     @Getter
@@ -36,22 +36,22 @@ public class Result {
     private String firstError;
 
     @Getter
-    @JsonProperty("Deleted")
+    @JsonProperty("deleted")
     private int deleted;
 
     @Getter
-    @JsonProperty("Skipped")
+    @JsonProperty("skipped")
     private int skipped;
 
     @Getter
-    @JsonProperty("Warnings")
+    @JsonProperty("warnings")
     private String warnings;
 
     @Getter
-    @JsonProperty("Changes")
+    @JsonProperty("changes")
     private String changes;
 
     @Getter
-    @JsonProperty("Ready")
+    @JsonProperty("ready")
     private String ready;
 }

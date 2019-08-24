@@ -1,8 +1,5 @@
 package network.marble.dataaccesslayer.models;
 
-
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.Getter;
@@ -10,14 +7,13 @@ import lombok.Setter;
 import lombok.ToString;
 import network.marble.dataaccesslayer.exceptions.APIException;
 import network.marble.dataaccesslayer.models.base.BaseModel;
-import okhttp3.Request;
 
 @Data
 @ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Game extends BaseModel<Game> {
     public Game(){
-        super("games", "games", "game");
+        super("games");
     }
 
     @Getter @Setter
@@ -41,12 +37,12 @@ public class Game extends BaseModel<Game> {
     public Boolean isBeta;
 
     /*public Map<String, Object> getIconMap() {
-    	Gson g = new Gson();
-    	Map<String, Object> map = null;
-    	if (iconMap != null && !iconMap.isEmpty()) {
-    		map = g.fromJson(iconMap, new TypeToken<Map<String, Object>>(){}.getType());
-    	}
-		return map;
+        Gson g = new Gson();
+        Map<String, Object> map = null;
+        if (iconMap != null && !iconMap.isEmpty()) {
+            map = g.fromJson(iconMap, new TypeToken<Map<String, Object>>(){}.getType());
+        }
+        return map;
     }
 
     public void setIconMap(Map<String, Object> map) {
@@ -55,7 +51,7 @@ public class Game extends BaseModel<Game> {
     }*/
 
     public Game getByName(String name) throws APIException {
-        return getSingle(urlEndPoint+"/name/"+name);
+        return getFromURL(urlEndPoint+"/name/"+name);
     }
 
     @Override

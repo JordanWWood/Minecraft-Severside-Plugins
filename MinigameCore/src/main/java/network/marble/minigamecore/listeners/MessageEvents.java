@@ -10,7 +10,6 @@ import network.marble.minigamecore.entities.events.message.GameSetEvent;
 import network.marble.minigamecore.entities.events.message.PingEvent;
 import network.marble.minigamecore.entities.events.message.UnknownMessageEvent;
 import network.marble.minigamecore.entities.messages.CrashReportMessage;
-import network.marble.minigamecore.entities.messages.ExpectPlayersMessage;
 import network.marble.minigamecore.entities.messages.PlayerExpectationCancelledMessage;
 import network.marble.minigamecore.entities.messages.PongMessage;
 import network.marble.minigamecore.managers.GameManager;
@@ -25,33 +24,30 @@ public class MessageEvents implements Listener {
 
     @EventHandler
     public void onGameSet(GameSetEvent event) {
-    	if(GameManager.getCurrentMiniGame() == null){
-	        boolean result = GameManager.getInstance(false).setCurrentGame(event.message.uuid);
-	        if(!result){
-		        	CrashReportMessage message = new CrashReportMessage();
-		            message.serverId = MiniGameCore.instanceId;
-		            message.sendToServer();
-		            MiniGameCore.logger.info("RESULT OF GAME SET FALSE, REBOOTING...");
-		            Bukkit.getServer().spigot().restart();
+        if(GameManager.getCurrentMiniGame() == null){
+            boolean result = GameManager.getInstance(false).setCurrentGame(event.message.uuid);
+            if(!result){
+                    CrashReportMessage message = new CrashReportMessage();
+                    message.serverId = MiniGameCore.instanceId;
+                    message.sendToServer();
+                    MiniGameCore.logger.info("RESULT OF GAME SET FALSE, REBOOTING...");
+                    Bukkit.getServer().shutdown();
 
-//	            	RabbitManager.getInstance().stopQueueConsumer();
-//	            	MiniGameCore.instanceId = UUID.randomUUID();
-//	            	ServerAvailableMessage readyMessage = new ServerAvailableMessage();
-//	            	readyMessage.serverId = MiniGameCore.instanceId;
-//	            	RabbitManager.getInstance().startQueueConsumer();
-//	            	readyMessage.sendToCreation();
-	        }
-    	}
+//                    RabbitManager.getInstance().stopQueueConsumer();
+//                    MiniGameCore.instanceId = UUID.randomUUID();
+//                    ServerAvailableMessage readyMessage = new ServerAvailableMessage();
+//                    readyMessage.serverId = MiniGameCore.instanceId;
+//                    RabbitManager.getInstance().startQueueConsumer();
+//                    readyMessage.sendToCreation();
+            }
+        }
     }
 
-<<<<<<< Updated upstream
     /*@EventHandler
     public void onExpectedPlayer(ExpectPlayersMessage event) {
         
     }*/
 
-=======
->>>>>>> Stashed changes
     @EventHandler
     public void onCancelExpectedPlayer(CancelExpectedPlayerEvent event) {
         PlayerExpectationManager.removePrePlayerRank(event.message.uuid);

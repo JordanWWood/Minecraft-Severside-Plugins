@@ -43,7 +43,10 @@ public class RabbitConsumer extends DefaultConsumer {
             int messageType = (int)properties.getHeaders().getOrDefault("message-type", 0);
             Object respondToRaw = properties.getHeaders().getOrDefault("respond-to", null);
             String respondTo = null;
-            if(respondToRaw != null){ respondTo = new String(((LongString)respondToRaw).getBytes(), "UTF-8"); MiniGameCore.logger.info("respondTo = " + respondTo);}
+            if (respondToRaw != null) {
+                respondTo = new String(((LongString)respondToRaw).getBytes(), "UTF-8");
+                MiniGameCore.logger.info("respondTo = " + respondTo);
+            }
             String message = new String(body, "UTF-8");
             Gson g = new Gson();
             switch (messageType) {
@@ -51,36 +54,34 @@ public class RabbitConsumer extends DefaultConsumer {
                     Bukkit.getServer().getPluginManager().callEvent(new PingEvent(new PingMessage()));
                     break;
                 case 48:
-                	PlayerExpectationManager.clearExpectations();
-                	if(GameManager.getCurrentMiniGame() == null){
-                		ServerAvailableMessage sam = new ServerAvailableMessage();
-                		sam.serverId = MiniGameCore.instanceId;
-                		sam.sendToCreation();
-                	}else{
-                		ServerDataMessage sdm = new ServerDataMessage();
-                		List<UUID> cL = new ArrayList<>();
-                		PlayerManager.getPlayers(PlayerType.PLAYER).forEach(p -> cL.add(p.id));
-                		UUID players[] = new UUID[cL.size()];
-                		players = cL.toArray(players);
-                		sdm.currentPlayers = players;
-                		sdm.serverId = MiniGameCore.instanceId;
-                		sdm.gameId = GameManager.getGameMode().id;
-                		sdm.status = GameManager.getStatus();
-                		sdm.sendToCreation();
-                	}
-                	break;
+                    PlayerExpectationManager.clearExpectations();
+                    if(GameManager.getCurrentMiniGame() == null){
+                        ServerAvailableMessage sam = new ServerAvailableMessage();
+                        sam.serverId = MiniGameCore.instanceId;
+                        sam.sendToCreation();
+                    }else{
+                        ServerDataMessage sdm = new ServerDataMessage();
+                        List<UUID> cL = new ArrayList<>();
+                        PlayerManager.getPlayers(PlayerType.PLAYER).forEach(p -> cL.add(p.id));
+                        UUID players[] = new UUID[cL.size()];
+                        players = cL.toArray(players);
+                        sdm.currentPlayers = players;
+                        sdm.serverId = MiniGameCore.instanceId;
+                        sdm.gameId = GameManager.getGameMode().id;
+                        sdm.status = GameManager.getStatus();
+                        sdm.sendToCreation();
+                    }
+                    break;
                 case 60:
                     GameModeSetMessage gsm = g.fromJson(message, GameModeSetMessage.class);
-                    Bukkit.getScheduler().runTask(MiniGameCore.instance, () -> {
-                    	Bukkit.getServer().getPluginManager().callEvent(new GameSetEvent(gsm));
-                    });
+                    Bukkit.getScheduler().runTask(MiniGameCore.instance, () -> Bukkit.getServer().getPluginManager().callEvent(new GameSetEvent(gsm)));
                     break;
                 case 61:
                     ExpectPlayersMessage epm = g.fromJson(message, ExpectPlayersMessage.class);
                     MiniGameCore.logger.info("Expect Player Event Start:\n"+message);
                     //TODO check max players and reject if the party wont fit
                     for (UUID uuid : epm.playerIds) {
-                    	PlayerExpectationManager.addPrePlayerRank(uuid, PlayerType.get(epm.type));
+                        PlayerExpectationManager.addPrePlayerRank(uuid, PlayerType.get(epm.type));
                     }
                     PlayersExpectedMessage pExpected = new PlayersExpectedMessage();
                     pExpected.playerID = epm.playerIds;

@@ -13,7 +13,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Advert extends BaseModel<Advert> {
     public Advert(){
-        super("plugins/adverts", "adverts", "advert");
+        super("plugins/adverts");
     }
 
     @Getter @Setter

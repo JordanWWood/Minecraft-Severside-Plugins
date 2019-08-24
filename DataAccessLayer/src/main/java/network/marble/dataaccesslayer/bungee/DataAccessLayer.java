@@ -10,7 +10,7 @@ public class DataAccessLayer extends Plugin
 
     @Override
     public void onEnable() {
-        instance = new network.marble.dataaccesslayer.base.DataAccessLayer(getLogger());
+        instance = new network.marble.dataaccesslayer.base.DataAccessLayer(getLogger(), getDataFolder());
         instance.onEnable();
     }
 

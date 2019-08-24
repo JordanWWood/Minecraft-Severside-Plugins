@@ -12,25 +12,28 @@ public abstract class SingleEquipVanityItem extends VanityItemBase {
      *
      * @param player
      */
-    public SingleEquipVanityItem(ItemStack item, Slot s, String name) {
-    	super(s, item, name);
-    }
-
-    public void equip(Player p) {
-        run(p);
-        super.equip(p);
+    public SingleEquipVanityItem(Player player, ItemStack item, Slot s, String name) {
+        super(player, s, name);
+        this.p = player;
+        this.nextItem = item;
     }
 
     @Override
-    protected void run(Player p) {
-        super.run(p);
+    public void invoke() {
+        run();
+        super.invoke();
+    }
+
+    @Override
+    protected void run() {
+        super.run();
     }
 
     /**
      * method is invoked when a player disconnects or equips a new item in the slot this is equipped in
      */
     @Override
-    public void unEquip(Player p) {
-        super.unEquip(p);
+    public void cancel() {
+        super.cancel();
     }
 }
