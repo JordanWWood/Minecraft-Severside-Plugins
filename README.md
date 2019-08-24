@@ -3,6 +3,7 @@
 ### What is this?
 * This is a collation of many pieces of my work relating to spigot that isnt protected by some sort of disclosure agreement.
 * I included all of the work in one repository to both make it easy to browse and easier to link work relating to what I am applying for
+* Plugin versions may be all over the place and may not match up to eachother. Marble is being rapidly developed.
 
 ### Plugin Information
 * **DataAccessLayer** is a plugin created to communicate with RethinkDB, a document database similar to mongo. In addition to this it creates and maintains a connection to RabbitMQ, a messaging layer.
